@@ -112,10 +112,12 @@ export default function NewsFeed() {
         <div>
           <h2
             id="news-heading"
-            className="flex items-center gap-2 text-lg font-bold text-white sm:text-xl"
+            className="text-base font-bold leading-snug text-white sm:text-xl"
           >
-            <Radio className="h-6 w-6 shrink-0 text-crisis-alert" aria-hidden="true" />
-            Noticias verificadas por Inteligencia Artificial
+            <span className="flex items-start gap-2 sm:items-center">
+              <Radio className="mt-0.5 h-5 w-5 shrink-0 text-crisis-alert sm:mt-0 sm:h-6 sm:w-6" aria-hidden="true" />
+              Noticias verificadas por Inteligencia Artificial
+            </span>
           </h2>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-crisis-muted">
             <Sparkles className="h-4 w-4 text-purple-400" aria-hidden="true" />

@@ -82,23 +82,23 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
           aria-expanded={isOpen}
           aria-controls="report-panel"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="flex w-full items-center justify-between gap-4 rounded-2xl border-2 border-crisis-alert bg-crisis-alert/20 px-5 py-5 text-left shadow-lg shadow-crisis-alert/10 transition-all hover:bg-crisis-alert/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-crisis-alert focus-visible:ring-offset-2 focus-visible:ring-offset-crisis-bg"
+          className="flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-crisis-alert bg-crisis-alert/20 px-4 py-4 text-left shadow-lg shadow-crisis-alert/10 transition-all hover:bg-crisis-alert/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-crisis-alert sm:gap-4 sm:px-5 sm:py-5"
         >
-          <span className="flex items-center gap-4">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-crisis-alert text-white">
-              <Megaphone className="h-7 w-7" aria-hidden="true" />
+          <span className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crisis-alert text-white sm:h-14 sm:w-14">
+              <Megaphone className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden="true" />
             </span>
-            <span>
-              <span className="block text-lg font-bold text-white sm:text-xl">
+            <span className="min-w-0">
+              <span className="block text-base font-bold leading-tight text-white sm:text-xl">
                 ¿Necesitas ayuda? Reporta aquí
               </span>
-              <span className="mt-0.5 block text-sm text-red-100">
-                Toca para abrir el formulario · Web, Telegram o WhatsApp
+              <span className="mt-0.5 block text-xs text-red-100 sm:text-sm">
+                Toca para abrir · Web, Telegram o WhatsApp
               </span>
             </span>
           </span>
           <ChevronDown
-            className={`h-7 w-7 shrink-0 text-white transition-transform ${isOpen ? "rotate-180" : ""}`}
+            className={`h-6 w-6 shrink-0 text-white transition-transform sm:h-7 sm:w-7 ${isOpen ? "rotate-180" : ""}`}
             aria-hidden="true"
           />
         </button>

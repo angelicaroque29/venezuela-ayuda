@@ -23,17 +23,20 @@ npm run dev
 
 Abre [http://localhost:3000](http://localhost:3000)
 
-## Procesamiento por lotes
+## Procesamiento por lotes (solo servidor)
+
+La IA **no se puede ejecutar desde la web** ni desde el panel de brigadas. Solo corre en el servidor:
 
 ```bash
-# Ejecutar un lote manualmente
+# Ejecutar un lote manualmente (administrador del servidor)
 npm run batch
 
-# Modo cron (cada hora)
+# Modo cron automático cada hora
 npm run batch:watch
 ```
 
-También puedes llamar `POST /api/batch` con header `Authorization: Bearer <BATCH_CRON_SECRET>`.
+Para cron HTTP externo (opcional), configura `BATCH_CRON_SECRET` y llama:
+`POST /api/batch` con header `Authorization: Bearer <BATCH_CRON_SECRET>`
 
 ## Bot de Telegram
 

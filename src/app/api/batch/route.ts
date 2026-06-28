@@ -9,9 +9,16 @@ import {
 
 export async function POST(request: NextRequest) {
   const secret = process.env.BATCH_CRON_SECRET;
-  const authHeader = request.headers.get("authorization");
 
-  if (secret && authHeader !== `Bearer ${secret}`) {
+  if (!secret) {
+    return NextResponse.json(
+      { error: "El procesamiento por IA solo está disponible en el servidor." },
+      { status: 403 }
+    );
+  }
+
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
@@ -51,6 +58,7 @@ export async function GET() {
     legitimateReports: legitimate.slice(0, 50),
     batches: batches.slice(0, 10),
     lastBatchTime: getLastBatchTime(),
-    nextBatchNote: "Los reportes se procesan cada hora en un solo llamado a IA.",
+    nextBatchNote:
+      "Los reportes se verifican automáticamente cada hora. Solo lectura.",
   });
 }

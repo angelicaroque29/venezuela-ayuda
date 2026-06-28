@@ -4,7 +4,6 @@ import CriticalStats from "@/components/CriticalStats";
 import EducationModule from "@/components/EducationModule";
 import ReportForm from "@/components/ReportForm";
 import NewsFeed from "@/components/NewsFeed";
-import ColorLegend from "@/components/ColorLegend";
 import AndroidAlertGuide from "@/components/AndroidAlertGuide";
 import { Heart, Shield } from "lucide-react";
 import Link from "next/link";
@@ -19,23 +18,23 @@ export default async function HomePage() {
     <>
       <LiveAlertBanner alertText={latestAlert} />
 
-      <header className="border-b border-crisis-border px-4 py-5">
+      <header className="border-b border-crisis-border px-4 py-4 sm:py-5">
         <div className="mx-auto max-w-6xl">
-          <div className="flex items-start justify-between gap-4">
-            <div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-widest text-crisis-alert">
                 Emergencia Nacional
               </p>
-              <h1 className="mt-1 text-2xl font-bold text-white sm:text-3xl">
+              <h1 className="mt-1 text-xl font-bold leading-tight text-white sm:text-3xl">
                 Alerta Sísmica Venezuela
               </h1>
-              <p className="mt-1 text-base text-crisis-muted">
+              <p className="mt-1 text-sm text-crisis-muted sm:text-base">
                 Información clara y en vivo para todas las familias
               </p>
             </div>
             <Link
               href="/panel"
-              className="flex shrink-0 items-center gap-1.5 rounded-lg border-2 border-crisis-border px-3 py-2 text-sm text-crisis-muted transition-colors hover:border-crisis-alert hover:text-white"
+              className="flex w-full shrink-0 items-center justify-center gap-1.5 rounded-lg border-2 border-crisis-border px-3 py-2.5 text-sm text-crisis-muted transition-colors hover:border-crisis-alert hover:text-white sm:w-auto"
             >
               <Shield className="h-4 w-4" aria-hidden="true" />
               Brigadas
@@ -44,16 +43,14 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6">
+      <main className="mx-auto max-w-6xl space-y-5 px-4 py-5 pb-8 sm:space-y-6 sm:py-6">
         <ReportForm prominent />
 
-        <AndroidAlertGuide />
-
-        <ColorLegend />
+        <AndroidAlertGuide compact />
 
         <CriticalStats />
 
-        <div className="grid gap-8 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-8">
           <div className="lg:col-span-3">
             <NewsFeed />
           </div>
@@ -63,10 +60,10 @@ export default async function HomePage() {
         </div>
       </main>
 
-      <footer className="mt-8 border-t border-crisis-border px-4 py-6 text-center">
-        <p className="flex items-center justify-center gap-1.5 text-sm text-crisis-muted">
+      <footer className="border-t border-crisis-border px-4 py-5 text-center">
+        <p className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-crisis-muted">
           <Heart className="h-4 w-4 text-crisis-alert" aria-hidden="true" />
-          Hecho para el pueblo venezolano · Noticias verificadas por IA cada hora
+          Hecho para el pueblo venezolano
         </p>
       </footer>
     </>

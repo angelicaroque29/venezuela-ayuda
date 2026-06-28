@@ -53,13 +53,13 @@ const ALTERNATIVE_PATHS = [
 ];
 
 export default function AndroidAlertGuide({ compact = false }: { compact?: boolean }) {
-  const [expanded, setExpanded] = useState(!compact);
+  const [expanded, setExpanded] = useState(false);
 
   if (compact) {
     return (
       <section
         aria-labelledby="android-alert-compact"
-        className="rounded-2xl border-2 border-green-600/50 bg-green-950/30 p-4"
+        className="rounded-2xl border-2 border-green-600/50 bg-green-950/30 p-3 sm:p-4"
       >
         <button
           type="button"
@@ -67,7 +67,7 @@ export default function AndroidAlertGuide({ compact = false }: { compact?: boole
           aria-expanded={expanded}
           aria-controls="android-alert-panel"
           onClick={() => setExpanded((p) => !p)}
-          className="flex w-full items-center justify-between gap-3 text-left"
+          className="flex w-full items-center justify-between gap-2 text-left sm:gap-3"
         >
           <span className="flex items-center gap-3">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-500/20">
