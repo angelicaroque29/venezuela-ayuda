@@ -118,11 +118,11 @@ export default function NewsFeed() {
               Noticias filtradas por relevancia sísmica
             </span>
           </h2>
-          <p className="mt-1 text-sm text-crisis-muted">
-            Desde medios venezolanos · filtro automático por palabras clave
-            <span className="text-crisis-muted/80"> (sin IA)</span>
-            {updatedAt && ` · Actualizado ${timeAgo(updatedAt)}`}
-          </p>
+          {updatedAt && (
+            <p className="mt-1 text-sm text-crisis-muted">
+              Actualizado {timeAgo(updatedAt)}
+            </p>
+          )}
         </div>
         <button
           type="button"
