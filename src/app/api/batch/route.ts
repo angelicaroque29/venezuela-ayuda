@@ -5,6 +5,8 @@ import {
   getBatchResults,
   getLastBatchTime,
   getUnprocessedReports,
+  getPendingReportsList,
+  getRejectedReports,
 } from "@/lib/report-store";
 
 export async function POST(request: NextRequest) {
@@ -55,10 +57,12 @@ export async function GET() {
 
   return NextResponse.json({
     pendingCount: pending.length,
-    legitimateReports: legitimate.slice(0, 50),
+    legitimateReports: legitimate.slice(0, 100),
+    pendingReports: getPendingReportsList().slice(0, 50),
+    rejectedReports: getRejectedReports().slice(0, 50),
     batches: batches.slice(0, 10),
     lastBatchTime: getLastBatchTime(),
     nextBatchNote:
-      "Los reportes se verifican automáticamente cada hora. Solo lectura.",
+      "Los reportes se verifican automáticamente cada hora. Este panel es solo lectura.",
   });
 }

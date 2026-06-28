@@ -118,6 +118,14 @@ export function getLegitimateReports(): CitizenReport[] {
   return getAllReports().filter((r) => r.processed && r.legitimate);
 }
 
+export function getPendingReportsList(): CitizenReport[] {
+  return getAllReports().filter((r) => !r.processed);
+}
+
+export function getRejectedReports(): CitizenReport[] {
+  return getAllReports().filter((r) => r.processed && r.legitimate === false);
+}
+
 export function getLastBatchTime(): string | null {
   const results = getBatchResults();
   return results[0]?.processedAt ?? null;

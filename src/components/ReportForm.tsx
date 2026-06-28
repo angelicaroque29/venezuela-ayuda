@@ -102,7 +102,7 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
         </button>
 
         {isOpen && (
-          <div id="report-panel" className="mt-4">
+          <div id="report-panel" className="mt-4 space-y-4">
             <ReportFormContent
               text={text}
               setText={setText}

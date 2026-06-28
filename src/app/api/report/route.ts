@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message:
-        "Reporte recibido. Será verificado por IA en el próximo lote horario y enviado a brigadistas.",
+        "Reporte guardado en el servidor. Se verificará cada hora y, si es legítimo, aparecerá en el panel de brigadas (/panel).",
       reportId: report.id,
     });
   } catch {

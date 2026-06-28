@@ -4,7 +4,8 @@ import CriticalStats from "@/components/CriticalStats";
 import EducationModule from "@/components/EducationModule";
 import ReportForm from "@/components/ReportForm";
 import NewsFeed from "@/components/NewsFeed";
-import AndroidAlertGuide from "@/components/AndroidAlertGuide";
+import EarthquakeAlertGuide from "@/components/EarthquakeAlertGuide";
+import ReportFlowInfo from "@/components/ReportFlowInfo";
 import { Heart, Shield } from "lucide-react";
 import Link from "next/link";
 
@@ -46,7 +47,9 @@ export default async function HomePage() {
       <main className="mx-auto max-w-6xl space-y-5 px-4 py-5 pb-8 sm:space-y-6 sm:py-6">
         <ReportForm prominent />
 
-        <AndroidAlertGuide compact />
+        <ReportFlowInfo />
+
+        <EarthquakeAlertGuide compact />
 
         <CriticalStats />
 

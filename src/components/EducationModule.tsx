@@ -31,58 +31,34 @@ export default function EducationModule() {
           icon={Smartphone}
           iconColor="text-green-400"
           borderColor="border-green-800/50"
-          title="Activar alertas de terremoto (Android)"
+          title="Activar alertas de terremoto (Android e iPhone)"
           isOpen={openSection === "alertas"}
           onToggle={() => toggle("alertas")}
         >
           <div className="space-y-4">
             <p className="text-base text-gray-200">
-              El <strong className="text-white">Sistema de alertas sísmicas de Android</strong>{" "}
-              (de Google) puede avisarte segundos antes de sentir el temblor. Es gratis.
+              Activa las alertas en tu teléfono. Arriba en la página hay una guía completa con
+              pestañas para <strong className="text-white">Android</strong> e{" "}
+              <strong className="text-white">iPhone</strong>.
             </p>
 
-            <ol className="list-decimal space-y-3 pl-5 text-base leading-relaxed text-gray-200">
-              <li>
-                Abre <strong className="text-white">Ajustes</strong> (ícono ⚙️).
-              </li>
-              <li>
-                Entra en <strong className="text-white">Seguridad y emergencia</strong>.
-                <br />
-                <span className="text-sm text-crisis-muted">
-                  Alternativa: Ajustes → Ubicación → Servicios de ubicación
-                </span>
-              </li>
-              <li>
-                Activa <strong className="text-white">Alertas de terremotos</strong>.
-              </li>
-              <li>
-                Acepta permisos de <strong className="text-white">ubicación</strong> y{" "}
-                <strong className="text-white">notificaciones</strong>.
-              </li>
-            </ol>
-
-            <div className="rounded-lg border border-crisis-border bg-crisis-bg/60 p-3">
-              <p className="mb-2 text-sm font-semibold text-green-300">Rutas por marca:</p>
-              <ul className="space-y-1.5 text-sm text-gray-300">
-                <li>
-                  <strong className="text-white">Samsung:</strong> Seguridad y emergencia →
-                  Alertas inalámbricas
-                </li>
-                <li>
-                  <strong className="text-white">Xiaomi:</strong> Contraseñas y seguridad →
-                  Emergencia
-                </li>
-                <li>
-                  <strong className="text-white">Cualquiera:</strong> Busca «terremoto» en
-                  Ajustes 🔍
-                </li>
-              </ul>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-lg border-2 border-green-700/50 bg-green-950/30 p-3">
+                <p className="mb-2 text-sm font-bold text-green-400">Android</p>
+                <ol className="list-decimal space-y-1.5 pl-4 text-sm text-gray-200">
+                  <li>Ajustes → Seguridad y emergencia</li>
+                  <li>Alertas de terremotos → Activar</li>
+                </ol>
+              </div>
+              <div className="rounded-lg border-2 border-blue-700/50 bg-blue-950/30 p-3">
+                <p className="mb-2 text-sm font-bold text-blue-400">iPhone</p>
+                <ol className="list-decimal space-y-1.5 pl-4 text-sm text-gray-200">
+                  <li>Ajustes → Notificaciones</li>
+                  <li>Alertas gubernamentales → Activar emergencia</li>
+                  <li>App Store: instala <strong className="text-white">MyShake</strong></li>
+                </ol>
+              </div>
             </div>
-
-            <p className="rounded-lg border-2 border-green-700/50 bg-green-950/40 p-3 text-sm text-green-200">
-              <strong className="text-green-100">✓ Recomendado:</strong> Actívalo en el teléfono
-              de cada familiar. Necesitas Android 5+ y Google Play Services.
-            </p>
           </div>
         </AccordionItem>
 
