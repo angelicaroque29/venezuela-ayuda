@@ -61,11 +61,9 @@ En Vercel → **Settings** → **Environment Variables**, añade:
 
 ## Paso 5 — Cron automático (triaje cada hora) — GRATIS
 
-El cron nativo de Vercel requiere plan Pro (~$20/mes).
+> **Importante:** No hay `vercel.json` con crons — eso requiere Vercel Pro y rompe el deploy gratis.
 
-**Solución gratis:** usa GitHub Actions o cron-job.org.
-
-Guía completa: **[CRON-GRATIS.md](./CRON-GRATIS.md)**
+Usa **GitHub Actions** (ya configurado). Guía: **[CRON-GRATIS.md](./CRON-GRATIS.md)**
 
 Resumen rápido:
 

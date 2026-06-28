@@ -57,6 +57,8 @@ Mínimo 32 caracteres, difícil de adivinar.
 
 Ya está configurado en `.github/workflows/hourly-batch.yml`.
 
+> **Nota:** No usamos cron de Vercel (requiere Pro ~$20/mes). El archivo `vercel.json` con crons fue eliminado para que el deploy en plan Hobby funcione.
+
 1. Despliega primero en Vercel y copia tu URL  
    Ej: `https://venezuela-ayuda.vercel.app`
 
@@ -110,7 +112,7 @@ Deja la terminal abierta. No sirve para producción 24/7.
 ## Paso 4 — Verificar que funciona
 
 ```bash
-curl -s "https://TU-DOMINIO.vercel.app/api/cron/batch" \
+curl -s -X POST "https://TU-DOMINIO.vercel.app/api/batch" \
   -H "Authorization: Bearer TU_CRON_SECRET"
 ```
 
