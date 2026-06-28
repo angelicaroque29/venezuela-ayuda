@@ -92,10 +92,11 @@ Ya está configurado en `.github/workflows/hourly-batch.yml`.
 
 ---
 
-### Opción C — Vercel Cron (de pago)
+### Opción C — Vercel Cron (NO usar en plan gratis)
 
-El `vercel.json` ya tiene el cron configurado, pero en plan **Hobby (gratis) no corre automáticamente**.  
-Solo funciona en **Vercel Pro** (~$20/mes).
+~~Requiere Vercel Pro (~$20/mes).~~ **Eliminado del proyecto** — causaba fallos de deploy en Hobby.
+
+Usa GitHub Actions (Opción A) en su lugar.
 
 ---
 

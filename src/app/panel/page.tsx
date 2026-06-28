@@ -41,7 +41,6 @@ interface PanelData {
   rejectedReports: Report[];
   batches: BatchInfo[];
   lastBatchTime: string | null;
-  nextBatchNote: string;
 }
 
 type StatusFilter = "verificados" | "pendientes" | "rechazados" | "todos";
@@ -151,7 +150,7 @@ export default function PanelPage() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <StatCard label="Pendientes" value={data?.pendingCount ?? "—"} icon={Clock} />
           <StatCard
-            label="Triaje favorable"
+            label="Revisados"
             value={data?.legitimateReports.length ?? "—"}
             icon={CheckCircle}
           />
@@ -165,8 +164,7 @@ export default function PanelPage() {
 
         <p className="flex items-start gap-2 rounded-xl border border-crisis-border bg-crisis-surface px-4 py-3 text-sm text-crisis-muted">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" aria-hidden="true" />
-          {data?.nextBatchNote ??
-            "Los reportes se verifican automáticamente cada hora. Este panel es solo lectura."}
+          Reportes ciudadanos. Confirmar en terreno antes de actuar.
         </p>
 
         {data?.batches[0] && (
@@ -223,7 +221,7 @@ export default function PanelPage() {
                 value={statusFilter}
                 onChange={(v) => setStatusFilter(v as StatusFilter)}
                 options={[
-                  { value: "verificados", label: "Triaje IA favorable" },
+                  { value: "verificados", label: "Revisados" },
                   { value: "pendientes", label: "Pendientes" },
                   { value: "rechazados", label: "Rechazados" },
                   { value: "todos", label: "Todos" },
@@ -290,11 +288,6 @@ export default function PanelPage() {
                   <p className="mb-1 text-sm text-crisis-alert">📍 {r.ubicacion}</p>
                 )}
                 <p className="text-sm leading-relaxed text-gray-300">{r.resumen ?? r.text}</p>
-                {r.triageReason && (
-                  <p className="mt-2 text-xs text-purple-300">
-                    Triaje IA: {r.triageReason}
-                  </p>
-                )}
               </li>
             ))}
             {filteredReports.length === 0 && (
@@ -316,7 +309,7 @@ function StatusBadge({ status }: { status: "verificados" | "pendientes" | "recha
     rechazados: "bg-red-900/50 text-red-300",
   };
   const labels = {
-    verificados: "Triaje IA — confirmar",
+    verificados: "Revisado — confirmar",
     pendientes: "Pendiente",
     rechazados: "Rechazado",
   };

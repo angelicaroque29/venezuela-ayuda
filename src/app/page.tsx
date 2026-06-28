@@ -27,7 +27,8 @@ export default async function HomePage() {
               <p className="text-xs font-semibold uppercase tracking-widest text-crisis-alert">
                 Emergencia Nacional
               </p>
-              <h1 className="mt-1 text-xl font-bold leading-tight text-white sm:text-3xl">
+              <h1 className="mt-1 flex items-center gap-2 text-xl font-bold leading-tight text-white sm:text-3xl">
+                <span className="text-2xl sm:text-3xl" aria-hidden="true">🇻🇪</span>
                 Alerta Sísmica Venezuela
               </h1>
               <p className="mt-1 text-sm text-crisis-muted sm:text-base">

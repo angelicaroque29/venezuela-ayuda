@@ -8,8 +8,6 @@ import {
   getPendingReportsList,
   getRejectedReports,
 } from "@/lib/report-store";
-import { getStorageBackend } from "@/lib/storage";
-import { getOpenAIUsageStats } from "@/lib/openai-guard";
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.BATCH_CRON_SECRET || process.env.CRON_SECRET;
@@ -68,7 +66,6 @@ export async function GET() {
   const pending = await getUnprocessedReports();
   const legitimate = await getLegitimateReports();
   const batches = await getBatchResults();
-  const openaiUsage = await getOpenAIUsageStats(pending.length);
 
   return NextResponse.json({
     pendingCount: pending.length,
@@ -77,9 +74,5 @@ export async function GET() {
     rejectedReports: (await getRejectedReports()).slice(0, 50),
     batches: batches.slice(0, 10),
     lastBatchTime: await getLastBatchTime(),
-    storageBackend: getStorageBackend(),
-    openaiUsage,
-    nextBatchNote:
-      "OpenAI: máximo 1 llamada por hora (cron). Sin reportes pendientes = $0 en esa hora.",
   });
 }

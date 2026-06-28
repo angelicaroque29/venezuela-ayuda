@@ -14,8 +14,8 @@ const LAYERS = [
   {
     icon: Eye,
     color: "text-purple-400",
-    title: "Capa 2 — Triaje IA (cada hora)",
-    does: "Analiza coherencia, detecta bots, pánico infundado y duplicados maliciosos.",
+    title: "Capa 2 — Revisión automática de reportes",
+    does: "Analiza reportes ciudadanos para detectar spam, bots y contenido sospechoso.",
     doesNot: "NO verifica hechos en terreno. NO sustituye a Defensa Civil ni medios oficiales.",
   },
   {
@@ -41,7 +41,7 @@ export default function VerificationMethodology() {
       >
         <span className="flex items-center gap-2 text-sm font-semibold text-yellow-200 sm:text-base">
           <AlertTriangle className="h-5 w-5 shrink-0 text-yellow-400" aria-hidden="true" />
-          ¿Cómo verifica la IA? ¿Es 100% cierto?
+          ¿Cómo se revisan los reportes?
         </span>
         <ChevronDown
           className={`h-5 w-5 shrink-0 text-yellow-400 transition-transform ${expanded ? "rotate-180" : ""}`}
@@ -52,9 +52,9 @@ export default function VerificationMethodology() {
       {expanded && (
         <div id="verification-methodology" className="border-t border-yellow-800/30 px-4 pb-4 pt-3 sm:px-5">
           <p className="mb-4 text-sm leading-relaxed text-yellow-100/90">
-            <strong className="text-yellow-100">No.</strong> La IA hace{" "}
-            <strong className="text-white">triaje</strong>, no verificación de hechos. Un reporte
-            &quot;aprobado&quot; significa que <em>parece genuino</em>, no que esté confirmado.
+            <strong className="text-yellow-100">Importante:</strong> Un reporte aprobado significa
+            que <em>parece genuino</em>, no que esté confirmado. Las noticias se filtran por
+            palabras clave, sin IA.
           </p>
 
           <div className="space-y-3">
@@ -80,19 +80,9 @@ export default function VerificationMethodology() {
 
           <p className="mt-4 rounded-lg border border-crisis-border bg-crisis-bg/60 p-3 text-xs text-crisis-muted">
             Para afirmar que algo es cierto, cruza con: medios oficiales, Defensa Civil, FUNVISIS
-            o confirmación directa en el lugar. Este sitio ayuda a priorizar reportes, no a certificar
-            verdad absoluta.
+            o confirmación directa en el lugar. La IA solo revisa reportes ciudadanos — no estas
+            noticias.
           </p>
-
-          <div className="mt-3 rounded-lg border border-purple-800/40 bg-purple-950/30 p-3 text-sm text-purple-200">
-            <p className="font-semibold text-purple-100">Costo OpenAI (gpt-4o-mini)</p>
-            <ul className="mt-2 space-y-1 text-xs text-purple-200/90">
-              <li>• <strong>Máximo 1 llamada por hora</strong> — bloqueado en código</li>
-              <li>• Sin reportes pendientes = <strong>$0</strong> esa hora</li>
-              <li>• Uso típico (pocos reportes): <strong>~$0.50–$2/mes</strong></li>
-              <li>• Crisis alta (100+ reportes/día): <strong>~$3–8/mes</strong></li>
-            </ul>
-          </div>
         </div>
       )}
     </section>

@@ -22,9 +22,9 @@ const STEPS = [
   {
     icon: Sparkles,
     color: "text-purple-400",
-    title: "3. Triaje por IA (cada hora)",
+    title: "3. Revisión automática de reportes",
     detail:
-      "La IA detecta spam, bots y pánico infundado. NO confirma hechos — solo indica si el reporte parece genuino.",
+      "Los reportes se analizan para detectar spam y contenido sospechoso. NO confirma hechos — las brigadas deben verificar en terreno.",
   },
   {
     icon: Shield,

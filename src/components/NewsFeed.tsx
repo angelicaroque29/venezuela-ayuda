@@ -4,10 +4,9 @@ import { useEffect, useState } from "react";
 import {
   ExternalLink,
   RefreshCw,
-  ShieldCheck,
+  Newspaper,
   Radio,
   ChevronDown,
-  Sparkles,
 } from "lucide-react";
 import type { NewsItem } from "@/lib/news-fetcher";
 
@@ -46,9 +45,9 @@ function NewsCard({ item }: { item: NewsItem }) {
           </span>
         )}
         {item.verified && (
-          <span className="flex items-center gap-1 rounded-md bg-green-900/50 px-2.5 py-1 text-xs font-semibold text-green-300">
-            <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            Filtrado (RSS + relevancia)
+          <span className="flex items-center gap-1 rounded-md bg-blue-900/50 px-2.5 py-1 text-xs font-semibold text-blue-300">
+            <Newspaper className="h-3.5 w-3.5" aria-hidden="true" />
+            Medio verificado
           </span>
         )}
         <span className="text-xs text-crisis-muted">
@@ -119,9 +118,9 @@ export default function NewsFeed() {
               Noticias filtradas por relevancia sísmica
             </span>
           </h2>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-crisis-muted">
-            <Sparkles className="h-4 w-4 text-purple-400" aria-hidden="true" />
-            Noticias filtradas por relevancia sísmica
+          <p className="mt-1 text-sm text-crisis-muted">
+            Desde medios venezolanos · filtro automático por palabras clave
+            <span className="text-crisis-muted/80"> (sin IA)</span>
             {updatedAt && ` · Actualizado ${timeAgo(updatedAt)}`}
           </p>
         </div>
