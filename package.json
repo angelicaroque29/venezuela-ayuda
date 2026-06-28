@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "batch": "tsx scripts/run-batch.ts",
-    "batch:watch": "tsx scripts/run-batch.ts --watch"
+    "batch:watch": "tsx scripts/run-batch.ts --watch",
+    "generate-cron-secret": "node scripts/generate-cron-secret.js"
   },
   "dependencies": {
     "@vercel/kv": "^3.0.0",

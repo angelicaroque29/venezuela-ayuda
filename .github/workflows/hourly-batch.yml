@@ -1,0 +1,28 @@
+# Triaje IA cada hora — GRATIS con GitHub Actions
+# Alternativa al cron de Vercel Pro ($20/mes)
+
+name: Hourly IA Batch
+
+on:
+  schedule:
+    # Cada hora en punto (UTC)
+    - cron: "0 * * * *"
+  workflow_dispatch: # Permite ejecutar manualmente desde GitHub
+
+jobs:
+  run-batch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ejecutar triaje IA en Vercel
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X GET \
+            "${{ secrets.DEPLOY_URL }}/api/cron/batch" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "Respuesta: $body"
+          echo "HTTP: $http_code"
+          if [ "$http_code" -ge 400 ]; then
+            echo "Error en el lote"
+            exit 1
+          fi

@@ -43,11 +43,11 @@ En Vercel → **Settings** → **Environment Variables**, añade:
 | Variable | Valor | Obligatorio |
 |----------|-------|-------------|
 | `OPENAI_API_KEY` | `sk-...` | No (modo demo sin ella) |
-| `CRON_SECRET` | Una clave larga aleatoria | Sí (cron horario) |
+| `CRON_SECRET` | Clave secreta — genera con `npm run generate-cron-secret` | Sí (cron gratis) |
 | `BATCH_CRON_SECRET` | Misma clave o otra | Opcional |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | `58412...` | Recomendado |
 
-`CRON_SECRET` lo genera Vercel automáticamente al activar Cron Jobs en plan Pro, o puedes crear uno manualmente.
+`CRON_SECRET` lo creas tú. Ver [CRON-GRATIS.md](./CRON-GRATIS.md).
 
 ---
 
@@ -59,20 +59,28 @@ En Vercel → **Settings** → **Environment Variables**, añade:
 
 ---
 
-## Paso 5 — Cron automático (triaje cada hora)
+## Paso 5 — Cron automático (triaje cada hora) — GRATIS
 
-El archivo `vercel.json` ya configura:
+El cron nativo de Vercel requiere plan Pro (~$20/mes).
 
-```json
-"crons": [{ "path": "/api/cron/batch", "schedule": "0 * * * *" }]
-```
+**Solución gratis:** usa GitHub Actions o cron-job.org.
 
-- Requiere **Vercel Pro** para cron jobs en producción, **o** ejecuta manualmente desde tu máquina:
+Guía completa: **[CRON-GRATIS.md](./CRON-GRATIS.md)**
+
+Resumen rápido:
 
 ```bash
-curl -X POST https://TU-DOMINIO.vercel.app/api/batch \
-  -H "Authorization: Bearer TU_BATCH_CRON_SECRET"
+# 1. Genera tu clave
+npm run generate-cron-secret
+
+# 2. Pon CRON_SECRET en Vercel Environment Variables
+
+# 3. En GitHub → Settings → Secrets → Actions:
+#    CRON_SECRET = tu clave
+#    DEPLOY_URL  = https://tu-proyecto.vercel.app
 ```
+
+GitHub ejecutará `/api/cron/batch` cada hora automáticamente.
 
 ---
 
@@ -121,7 +129,8 @@ Una vez desplegado, comparte:
 
 ## Costos estimados
 
-- **Vercel Hobby**: gratis (sin cron automático)
-- **Vercel Pro**: ~$20/mes (incluye cron)
+- **Vercel Hobby**: gratis
+- **Cron (GitHub Actions o cron-job.org)**: gratis — ver [CRON-GRATIS.md](./CRON-GRATIS.md)
 - **Vercel KV**: tier gratis generoso para emergencias
-- **OpenAI**: ~$0.01–0.05 por lote horario (muy bajo con gpt-4o-mini)
+- **OpenAI**: ~$0.50–$4/mes según reportes (máx 1 llamada/hora)
+- **Vercel Pro**: ~$20/mes — solo si quieres cron nativo (no necesario)
