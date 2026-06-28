@@ -4,16 +4,12 @@ import { useState } from "react";
 import {
   MapPin,
   Send,
-  MessageCircle,
   CheckCircle,
   AlertCircle,
   ChevronDown,
   Megaphone,
 } from "lucide-react";
 import { validateReportLocally } from "@/lib/validate-report";
-
-const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "584121234567";
 
 interface ReportFormProps {
   defaultOpen?: boolean;
@@ -63,13 +59,9 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
       setUbicacion("");
     } catch {
       setStatus("error");
-      setMessage("Sin conexión. Intenta por WhatsApp o vuelve a intentar.");
+      setMessage("Sin conexión. Intenta de nuevo en unos minutos.");
     }
   };
-
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    "🚨 REPORTE SÍSMICO VE\nUbicación: \nSituación: "
-  )}`;
 
   if (prominent) {
     return (
@@ -91,7 +83,7 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
                 ¿Necesitas ayuda? Reporta aquí
               </span>
               <span className="mt-0.5 block text-xs text-red-100 sm:text-sm">
-                Toca para abrir · Formulario web o WhatsApp
+                Toca para abrir · Llega al panel de brigadas
               </span>
             </span>
           </span>
@@ -102,7 +94,7 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
         </button>
 
         {isOpen && (
-          <div id="report-panel" className="mt-4 space-y-4">
+          <div id="report-panel" className="mt-4">
             <ReportFormContent
               text={text}
               setText={setText}
@@ -111,7 +103,6 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
               status={status}
               message={message}
               onSubmit={handleSubmit}
-              whatsappUrl={whatsappUrl}
             />
           </div>
         )}
@@ -132,7 +123,6 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
         status={status}
         message={message}
         onSubmit={handleSubmit}
-        whatsappUrl={whatsappUrl}
       />
     </section>
   );
@@ -146,7 +136,6 @@ function ReportFormContent({
   status,
   message,
   onSubmit,
-  whatsappUrl,
 }: {
   text: string;
   setText: (v: string) => void;
@@ -155,79 +144,71 @@ function ReportFormContent({
   status: "idle" | "loading" | "success" | "error";
   message: string;
   onSubmit: (e: React.FormEvent) => void;
-  whatsappUrl: string;
 }) {
   return (
-    <div className="space-y-4">
-      <a
-        href={whatsappUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-4 text-center text-base font-bold text-white transition-opacity hover:opacity-90"
-      >
-        <MessageCircle className="h-5 w-5" aria-hidden="true" />
-        Reportar por WhatsApp
-      </a>
+    <form
+      onSubmit={onSubmit}
+      className="space-y-4 rounded-xl border-2 border-crisis-border bg-crisis-surface p-4 sm:p-5"
+    >
+      <p className="rounded-lg bg-blue-950/40 px-3 py-2 text-sm text-blue-200">
+        Tu reporte se guarda en el servidor y lo ven las brigadas en{" "}
+        <strong className="text-blue-100">/panel</strong> — no va a un chat personal.
+      </p>
 
-      <form
-        onSubmit={onSubmit}
-        className="space-y-4 rounded-xl border-2 border-crisis-border bg-crisis-surface p-4 sm:p-5"
+      <p className="rounded-lg bg-blue-950/40 px-3 py-2 text-sm text-blue-200">
+        <strong className="text-blue-100">Paso 1:</strong> Escribe dónde estás.{" "}
+        <strong className="text-blue-100">Paso 2:</strong> Describe qué necesitas.
+      </p>
+
+      <label className="block">
+        <span className="mb-1.5 flex items-center gap-2 text-base font-medium text-white">
+          <MapPin className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+          ¿Dónde estás? (ciudad, sector, estado)
+        </span>
+        <input
+          type="text"
+          value={ubicacion}
+          onChange={(e) => setUbicacion(e.target.value)}
+          placeholder="Ej: Caracas, Chacao, Miranda"
+          className="w-full rounded-lg border-2 border-crisis-border bg-crisis-bg px-4 py-3 text-base text-white placeholder:text-crisis-muted focus:border-yellow-400 focus:outline-none"
+        />
+      </label>
+
+      <label className="block">
+        <span className="mb-1.5 block text-base font-medium text-white">
+          ¿Qué está pasando? (daños, heridos, lo que necesitas)
+        </span>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={4}
+          required
+          placeholder="Ej: Edificio con grietas, necesitamos agua y mantas..."
+          className="w-full resize-none rounded-lg border-2 border-crisis-border bg-crisis-bg px-4 py-3 text-base text-white placeholder:text-crisis-muted focus:border-yellow-400 focus:outline-none"
+        />
+      </label>
+
+      <button
+        type="submit"
+        disabled={status === "loading"}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-crisis-alert px-4 py-4 text-lg font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        <p className="rounded-lg bg-blue-950/40 px-3 py-2 text-sm text-blue-200">
-          <strong className="text-blue-100">Paso 1:</strong> Escribe dónde estás.{" "}
-          <strong className="text-blue-100">Paso 2:</strong> Describe qué necesitas.
+        <Send className="h-6 w-6" aria-hidden="true" />
+        {status === "loading" ? "Enviando..." : "Enviar reporte a brigadas"}
+      </button>
+
+      {status === "success" && (
+        <p className="flex items-start gap-2 rounded-lg bg-green-950/50 p-3 text-base text-green-300" role="status">
+          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          {message}
         </p>
-
-        <label className="block">
-          <span className="mb-1.5 flex items-center gap-2 text-base font-medium text-white">
-            <MapPin className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-            ¿Dónde estás? (ciudad, sector, estado)
-          </span>
-          <input
-            type="text"
-            value={ubicacion}
-            onChange={(e) => setUbicacion(e.target.value)}
-            placeholder="Ej: Caracas, Chacao, Miranda"
-            className="w-full rounded-lg border-2 border-crisis-border bg-crisis-bg px-4 py-3 text-base text-white placeholder:text-crisis-muted focus:border-yellow-400 focus:outline-none"
-          />
-        </label>
-
-        <label className="block">
-          <span className="mb-1.5 block text-base font-medium text-white">
-            ¿Qué está pasando? (daños, heridos, lo que necesitas)
-          </span>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={4}
-            required
-            placeholder="Ej: Edificio con grietas, necesitamos agua y mantas..."
-            className="w-full resize-none rounded-lg border-2 border-crisis-border bg-crisis-bg px-4 py-3 text-base text-white placeholder:text-crisis-muted focus:border-yellow-400 focus:outline-none"
-          />
-        </label>
-
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-crisis-alert px-4 py-4 text-lg font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          <Send className="h-6 w-6" aria-hidden="true" />
-          {status === "loading" ? "Enviando..." : "Enviar mi reporte"}
-        </button>
-
-        {status === "success" && (
-          <p className="flex items-start gap-2 rounded-lg bg-green-950/50 p-3 text-base text-green-300" role="status">
-            <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-            {message}
-          </p>
-        )}
-        {status === "error" && (
-          <p className="flex items-start gap-2 rounded-lg bg-red-950/50 p-3 text-base text-red-300" role="alert">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-            {message}
-          </p>
-        )}
-      </form>
-    </div>
+      )}
+      {status === "error" && (
+        <p className="flex items-start gap-2 rounded-lg bg-red-950/50 p-3 text-base text-red-300" role="alert">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          {message}
+        </p>
+      )}
+    </form>
   );
 }

@@ -77,9 +77,7 @@ export default function ReportFlowInfo() {
           </div>
 
           <p className="mt-4 text-sm text-crisis-muted">
-            WhatsApp abre un chat directo — ese mensaje{" "}
-            <strong className="text-gray-300">no pasa por este sistema</strong> hasta que alguien
-            lo registre manualmente. El formulario web sí entra al flujo automático.
+            Los reportes del formulario web llegan al panel de brigadas para coordinar ayuda.
           </p>
 
           <Link
