@@ -152,7 +152,7 @@ function ReportFormContent({
     >
       <p className="rounded-lg bg-blue-950/40 px-3 py-2 text-sm text-blue-200">
         Tu reporte se guarda en el servidor y lo ven las brigadas en{" "}
-        <strong className="text-blue-100">/panel</strong> — no va a un chat personal.
+        <strong className="text-blue-100">/panel</strong>.
       </p>
 
       <p className="rounded-lg bg-blue-950/40 px-3 py-2 text-sm text-blue-200">
