@@ -44,15 +44,43 @@ export DATA_DIR=./data
 python bot/telegram_bot.py
 ```
 
-## Variables de entorno
+## Variables de entorno — cómo conseguirlas
 
-| Variable | Descripción |
-|----------|-------------|
-| `OPENAI_API_KEY` | API key para análisis por lotes (opcional en demo) |
-| `TELEGRAM_BOT_TOKEN` | Token del bot de Telegram |
-| `BATCH_CRON_SECRET` | Protege el endpoint de lotes |
-| `NEXT_PUBLIC_TELEGRAM_BOT_LINK` | Enlace al bot |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Número WhatsApp para reportes |
+Copia `.env.example` a `.env.local` y completa cada valor:
+
+### `OPENAI_API_KEY` (análisis por lotes)
+
+1. Ve a [platform.openai.com](https://platform.openai.com)
+2. Crea una cuenta o inicia sesión
+3. Entra en **API keys** → **Create new secret key**
+4. Copia la clave (empieza con `sk-...`) y pégala en `.env.local`
+5. Necesitas saldo en tu cuenta OpenAI (cobran por uso; el modo lote usa pocos tokens)
+
+Sin esta clave el sitio funciona en **modo demo** (no llama a OpenAI).
+
+### `TELEGRAM_BOT_TOKEN` (bot de reportes)
+
+1. Abre Telegram y busca **@BotFather**
+2. Envía `/newbot`
+3. Elige un nombre y un usuario (ej: `venezuela_sismo_bot`)
+4. BotFather te dará un token como `123456789:ABCdefGHI...`
+5. Pégalo en `.env.local` como `TELEGRAM_BOT_TOKEN`
+
+### `NEXT_PUBLIC_TELEGRAM_BOT_LINK` (enlace público al bot)
+
+1. Usa el usuario que creaste en BotFather
+2. El enlace es: `https://t.me/TU_USUARIO_BOT`
+3. Ejemplo: `https://t.me/venezuela_sismo_bot`
+
+### `NEXT_PUBLIC_WHATSAPP_NUMBER` (reportes por WhatsApp)
+
+1. Usa un número de teléfono con WhatsApp (puede ser de una brigada o línea de ayuda)
+2. Escribe el número **con código de país, sin + ni espacios**
+3. Ejemplo Venezuela: `584121234567` (58 = país, 412 = móvil)
+
+### `BATCH_CRON_SECRET` (opcional)
+
+Una contraseña cualquiera que tú inventes para proteger el endpoint de lotes. Ejemplo: `mi_clave_secreta_123`
 
 ## Arquitectura de costos
 
