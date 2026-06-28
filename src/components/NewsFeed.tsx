@@ -48,7 +48,7 @@ function NewsCard({ item }: { item: NewsItem }) {
         {item.verified && (
           <span className="flex items-center gap-1 rounded-md bg-green-900/50 px-2.5 py-1 text-xs font-semibold text-green-300">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            Verificado por IA
+            Filtrado (RSS + relevancia)
           </span>
         )}
         <span className="text-xs text-crisis-muted">
@@ -116,12 +116,12 @@ export default function NewsFeed() {
           >
             <span className="flex items-start gap-2 sm:items-center">
               <Radio className="mt-0.5 h-5 w-5 shrink-0 text-crisis-alert sm:mt-0 sm:h-6 sm:w-6" aria-hidden="true" />
-              Noticias verificadas por Inteligencia Artificial
+              Noticias filtradas por relevancia sísmica
             </span>
           </h2>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-crisis-muted">
             <Sparkles className="h-4 w-4 text-purple-400" aria-hidden="true" />
-            Filtradas para quitar noticias falsas
+            Noticias filtradas por relevancia sísmica
             {updatedAt && ` · Actualizado ${timeAgo(updatedAt)}`}
           </p>
         </div>

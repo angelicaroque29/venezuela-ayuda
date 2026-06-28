@@ -6,6 +6,7 @@ import ReportForm from "@/components/ReportForm";
 import NewsFeed from "@/components/NewsFeed";
 import EarthquakeAlertGuide from "@/components/EarthquakeAlertGuide";
 import ReportFlowInfo from "@/components/ReportFlowInfo";
+import VerificationMethodology from "@/components/VerificationMethodology";
 import { Heart, Shield } from "lucide-react";
 import Link from "next/link";
 
@@ -48,6 +49,8 @@ export default async function HomePage() {
         <ReportForm prominent />
 
         <ReportFlowInfo />
+
+        <VerificationMethodology />
 
         <EarthquakeAlertGuide compact />
 

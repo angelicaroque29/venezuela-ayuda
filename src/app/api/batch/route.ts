@@ -8,20 +8,21 @@ import {
   getPendingReportsList,
   getRejectedReports,
 } from "@/lib/report-store";
+import { getStorageBackend } from "@/lib/storage";
+
+function isAuthorized(request: NextRequest): boolean {
+  const secret = process.env.BATCH_CRON_SECRET || process.env.CRON_SECRET;
+  if (!secret) return false;
+  const authHeader = request.headers.get("authorization");
+  return authHeader === `Bearer ${secret}`;
+}
 
 export async function POST(request: NextRequest) {
-  const secret = process.env.BATCH_CRON_SECRET;
-
-  if (!secret) {
+  if (!isAuthorized(request)) {
     return NextResponse.json(
-      { error: "El procesamiento por IA solo está disponible en el servidor." },
-      { status: 403 }
+      { error: "No autorizado. El procesamiento IA solo corre en el servidor." },
+      { status: 401 }
     );
-  }
-
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
   try {
@@ -51,18 +52,19 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  const pending = getUnprocessedReports();
-  const legitimate = getLegitimateReports();
-  const batches = getBatchResults();
+  const pending = await getUnprocessedReports();
+  const legitimate = await getLegitimateReports();
+  const batches = await getBatchResults();
 
   return NextResponse.json({
     pendingCount: pending.length,
     legitimateReports: legitimate.slice(0, 100),
-    pendingReports: getPendingReportsList().slice(0, 50),
-    rejectedReports: getRejectedReports().slice(0, 50),
+    pendingReports: (await getPendingReportsList()).slice(0, 50),
+    rejectedReports: (await getRejectedReports()).slice(0, 50),
     batches: batches.slice(0, 10),
-    lastBatchTime: getLastBatchTime(),
+    lastBatchTime: await getLastBatchTime(),
+    storageBackend: getStorageBackend(),
     nextBatchNote:
-      "Los reportes se verifican automáticamente cada hora. Este panel es solo lectura.",
+      "Triaje IA automático cada hora. Los reportes NO están confirmados — requieren verificación en terreno.",
   });
 }

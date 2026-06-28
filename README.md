@@ -23,6 +23,29 @@ npm run dev
 
 Abre [http://localhost:3000](http://localhost:3000)
 
+## Desplegar en Vercel (producción)
+
+Guía completa en **[DEPLOY.md](./DEPLOY.md)** — incluye Vercel KV, variables de entorno, cron y dominio.
+
+Resumen rápido:
+1. Importa el repo en [vercel.com/new](https://vercel.com/new)
+2. Crea **Vercel KV** en Storage y conéctalo al proyecto
+3. Añade `OPENAI_API_KEY`, `CRON_SECRET`, `NEXT_PUBLIC_WHATSAPP_NUMBER`
+4. Deploy → comparte la URL
+
+## ¿Cómo verifica la IA? ¿Es cierto?
+
+**No es verdad confirmada — es triaje.**
+
+| Capa | Qué hace |
+|------|----------|
+| Filtro local | Bloquea spam antes de guardar |
+| Triaje IA (hora) | Detecta bots, pánico infundado, incoherencias |
+| Brigadas | **Deben confirmar en terreno** antes de actuar |
+
+Un reporte "aprobado" por IA significa que *parece genuino*, no que el hecho sea cierto.
+Cruza siempre con Defensa Civil, FUNVISIS y medios oficiales.
+
 ## Procesamiento por lotes (solo servidor)
 
 La IA **no se puede ejecutar desde la web** ni desde el panel de brigadas. Solo corre en el servidor:
@@ -70,6 +93,6 @@ Una contraseña cualquiera que tú inventes para proteger el endpoint de lotes. 
 ## Arquitectura de costos
 
 1. **Frontend**: validación JS con palabras clave → bloquea spam sin costo
-2. **Almacenamiento**: reportes en `data/reports.json` sin llamar a IA
+2. **Almacenamiento**: reportes en Vercel KV (producción) o `data/*.json` (local)
 3. **Backend**: cada hora, todos los reportes se agrupan en **un solo prompt** a OpenAI
 4. **Resultado**: panel de brigadistas actualizado con reportes legítimos y falsos marcados

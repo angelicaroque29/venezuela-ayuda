@@ -17,21 +17,21 @@ const STEPS = [
     color: "text-yellow-400",
     title: "2. Se guarda en el servidor",
     detail:
-      "Los reportes válidos se almacenan en data/reports.json en el servidor. Quedan en cola esperando verificación.",
+      "Los reportes válidos se almacenan en la base de datos del servidor (Vercel KV en producción). Quedan en cola esperando triaje.",
   },
   {
     icon: Sparkles,
     color: "text-purple-400",
-    title: "3. Verificación por IA (cada hora)",
+    title: "3. Triaje por IA (cada hora)",
     detail:
-      "Un proceso automático en el servidor analiza todos los reportes juntos, detecta desinformación y marca cuáles son legítimos.",
+      "La IA detecta spam, bots y pánico infundado. NO confirma hechos — solo indica si el reporte parece genuino.",
   },
   {
     icon: Shield,
     color: "text-green-400",
-    title: "4. Llega al panel de brigadas",
+    title: "4. Panel de brigadas (confirmar en terreno)",
     detail:
-      "Solo los reportes verificados aparecen en /panel para equipos de rescate, Defensa Civil y brigadas en terreno.",
+      "Reportes con triaje favorable aparecen en /panel. Las brigadas deben confirmar antes de actuar.",
   },
 ];
 

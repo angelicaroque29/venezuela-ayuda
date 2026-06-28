@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const report = addReport(text, source, ubicacion);
+    const report = await addReport(text, source, ubicacion);
 
     return NextResponse.json({
       success: true,

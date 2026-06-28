@@ -31,6 +31,7 @@ interface Report {
   categoria?: string;
   prioridad?: string;
   resumen?: string;
+  triageReason?: string;
 }
 
 interface PanelData {
@@ -150,7 +151,7 @@ export default function PanelPage() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <StatCard label="Pendientes" value={data?.pendingCount ?? "—"} icon={Clock} />
           <StatCard
-            label="Verificados"
+            label="Triaje favorable"
             value={data?.legitimateReports.length ?? "—"}
             icon={CheckCircle}
           />
@@ -222,9 +223,9 @@ export default function PanelPage() {
                 value={statusFilter}
                 onChange={(v) => setStatusFilter(v as StatusFilter)}
                 options={[
-                  { value: "verificados", label: "Verificados" },
+                  { value: "verificados", label: "Triaje IA favorable" },
                   { value: "pendientes", label: "Pendientes" },
-                  { value: "rechazados", label: "Rechazados / falsos" },
+                  { value: "rechazados", label: "Rechazados" },
                   { value: "todos", label: "Todos" },
                 ]}
               />
@@ -289,6 +290,11 @@ export default function PanelPage() {
                   <p className="mb-1 text-sm text-crisis-alert">📍 {r.ubicacion}</p>
                 )}
                 <p className="text-sm leading-relaxed text-gray-300">{r.resumen ?? r.text}</p>
+                {r.triageReason && (
+                  <p className="mt-2 text-xs text-purple-300">
+                    Triaje IA: {r.triageReason}
+                  </p>
+                )}
               </li>
             ))}
             {filteredReports.length === 0 && (
@@ -305,12 +311,12 @@ export default function PanelPage() {
 
 function StatusBadge({ status }: { status: "verificados" | "pendientes" | "rechazados" }) {
   const styles = {
-    verificados: "bg-green-900/50 text-green-300",
+    verificados: "bg-purple-900/50 text-purple-200",
     pendientes: "bg-yellow-900/50 text-yellow-300",
     rechazados: "bg-red-900/50 text-red-300",
   };
   const labels = {
-    verificados: "Verificado",
+    verificados: "Triaje IA — confirmar",
     pendientes: "Pendiente",
     rechazados: "Rechazado",
   };

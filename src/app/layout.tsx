@@ -4,9 +4,15 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Alerta Sísmica Venezuela — Información en Vivo",
   description:
-    "Noticias verificadas, alertas en vivo y reportes ciudadanos ante la emergencia sísmica en Venezuela.",
+    "Alertas en vivo, guías de supervivencia y reportes ciudadanos ante la emergencia sísmica en Venezuela.",
   keywords: ["sismo", "Venezuela", "terremoto", "emergencia", "Caracas", "La Guaira"],
   robots: "index, follow",
+  openGraph: {
+    title: "Alerta Sísmica Venezuela",
+    description: "Información en vivo para familias afectadas por la emergencia sísmica.",
+    type: "website",
+    locale: "es_VE",
+  },
 };
 
 export const viewport: Viewport = {

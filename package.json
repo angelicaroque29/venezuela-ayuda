@@ -11,6 +11,7 @@
     "batch:watch": "tsx scripts/run-batch.ts --watch"
   },
   "dependencies": {
+    "@vercel/kv": "^3.0.0",
     "lucide-react": "^0.468.0",
     "next": "14.2.35",
     "openai": "^4.77.0",
