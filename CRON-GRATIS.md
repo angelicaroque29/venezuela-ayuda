@@ -69,7 +69,9 @@ Ya está configurado en `.github/workflows/hourly-batch.yml`.
 | `CRON_SECRET` | La misma clave que pusiste en Vercel |
 | `DEPLOY_URL` | Tu URL sin barra final. Ej: `https://venezuela-ayuda.vercel.app` |
 
-4. Listo. GitHub ejecutará el triaje **cada hora gratis**.
+4. Listo. GitHub ejecutará el triaje **cada hora gratis** llamando a `POST /api/batch`.
+
+> **Si ves error 404:** tu Vercel tiene código viejo. Ve a Vercel → **Deployments** → **Redeploy** (rama `main`).
 
 **Probar manualmente:** GitHub → **Actions** → **Hourly IA Batch** → **Run workflow**
 
