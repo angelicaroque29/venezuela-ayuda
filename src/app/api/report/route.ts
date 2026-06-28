@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message:
-        "Reporte guardado en el servidor. Se verificará cada hora y, si es legítimo, aparecerá en el panel de brigadas (/panel).",
+        "Reporte enviado al panel de brigadas. Será revisado y priorizado.",
       reportId: report.id,
     });
   } catch {
