@@ -5,6 +5,7 @@ import {
   saveBatchResult,
   CitizenReport,
 } from "./report-store";
+import { canCallOpenAI, recordOpenAICall } from "./openai-guard";
 
 export const VERIFICATION_METHODOLOGY = `
 La IA NO confirma hechos en terreno. Solo hace TRIAJE:
@@ -12,6 +13,9 @@ La IA NO confirma hechos en terreno. Solo hace TRIAJE:
 - Clasifica reportes que parecen genuinos según coherencia interna
 - Las brigadas DEBEN confirmar en terreno antes de actuar
 `.trim();
+
+/** Máximo de reportes por lote para controlar tokens */
+const MAX_REPORTS_PER_BATCH = Number(process.env.MAX_REPORTS_PER_BATCH ?? 50);
 
 export interface BatchAnalysisResult {
   legitimate: string[];
@@ -25,6 +29,11 @@ export interface BatchAnalysisResult {
     triageReason?: string;
   }>;
 }
+
+export type BatchProcessResult =
+  | { status: "processed"; data: BatchAnalysisResult; usedOpenAI: boolean }
+  | { status: "no_reports" }
+  | { status: "rate_limited"; nextAllowedAt: string };
 
 function buildBatchPrompt(reports: CitizenReport[]): string {
   const numbered = reports
@@ -84,39 +93,60 @@ function mockBatchAnalysis(reports: CitizenReport[]): BatchAnalysisResult {
   };
 }
 
-export async function processReportBatch(): Promise<BatchAnalysisResult | null> {
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-  const reports = await getUnprocessedReports(oneHourAgo);
+async function callOpenAITriage(reports: CitizenReport[]): Promise<BatchAnalysisResult> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return mockBatchAnalysis(reports);
+  }
+
+  const openai = new OpenAI({ apiKey });
+  const prompt = buildBatchPrompt(reports);
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content:
+          "Eres un asistente de triaje para emergencias. Nunca afirmes que un reporte es factualmente cierto. Solo indica si parece genuino o sospechoso.",
+      },
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.1,
+    response_format: { type: "json_object" },
+    max_tokens: 4096,
+  });
+
+  const content = response.choices[0]?.message?.content ?? "{}";
+  return JSON.parse(content) as BatchAnalysisResult;
+}
+
+export async function processReportBatch(): Promise<BatchProcessResult> {
+  const allPending = await getUnprocessedReports();
+  const reports = allPending.slice(0, MAX_REPORTS_PER_BATCH);
 
   if (reports.length === 0) {
-    return null;
+    return { status: "no_reports" };
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
   let analysis: BatchAnalysisResult;
+  let usedOpenAI = false;
 
   if (!apiKey) {
     analysis = mockBatchAnalysis(reports);
   } else {
-    const openai = new OpenAI({ apiKey });
-    const prompt = buildBatchPrompt(reports);
+    const guard = await canCallOpenAI();
+    if (!guard.allowed) {
+      return {
+        status: "rate_limited",
+        nextAllowedAt: guard.nextAllowedAt!,
+      };
+    }
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Eres un asistente de triaje para emergencias. Nunca afirmes que un reporte es factualmente cierto. Solo indica si parece genuino o sospechoso.",
-        },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.1,
-      response_format: { type: "json_object" },
-    });
-
-    const content = response.choices[0]?.message?.content ?? "{}";
-    analysis = JSON.parse(content) as BatchAnalysisResult;
+    analysis = await callOpenAITriage(reports);
+    await recordOpenAICall(reports.length);
+    usedOpenAI = true;
   }
 
   const metadata = new Map<
@@ -144,5 +174,12 @@ export async function processReportBatch(): Promise<BatchAnalysisResult | null> 
     methodology: VERIFICATION_METHODOLOGY,
   });
 
-  return analysis;
+  return { status: "processed", data: analysis, usedOpenAI };
+}
+
+/** Compatibilidad con scripts locales */
+export async function processReportBatchLegacy(): Promise<BatchAnalysisResult | null> {
+  const result = await processReportBatch();
+  if (result.status === "processed") return result.data;
+  return null;
 }

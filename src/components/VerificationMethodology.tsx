@@ -83,6 +83,16 @@ export default function VerificationMethodology() {
             o confirmación directa en el lugar. Este sitio ayuda a priorizar reportes, no a certificar
             verdad absoluta.
           </p>
+
+          <div className="mt-3 rounded-lg border border-purple-800/40 bg-purple-950/30 p-3 text-sm text-purple-200">
+            <p className="font-semibold text-purple-100">Costo OpenAI (gpt-4o-mini)</p>
+            <ul className="mt-2 space-y-1 text-xs text-purple-200/90">
+              <li>• <strong>Máximo 1 llamada por hora</strong> — bloqueado en código</li>
+              <li>• Sin reportes pendientes = <strong>$0</strong> esa hora</li>
+              <li>• Uso típico (pocos reportes): <strong>~$0.50–$2/mes</strong></li>
+              <li>• Crisis alta (100+ reportes/día): <strong>~$3–8/mes</strong></li>
+            </ul>
+          </div>
         </div>
       )}
     </section>

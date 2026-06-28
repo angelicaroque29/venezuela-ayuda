@@ -9,6 +9,7 @@ import {
   getRejectedReports,
 } from "@/lib/report-store";
 import { getStorageBackend } from "@/lib/storage";
+import { getOpenAIUsageStats } from "@/lib/openai-guard";
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.BATCH_CRON_SECRET || process.env.CRON_SECRET;
@@ -28,19 +29,31 @@ export async function POST(request: NextRequest) {
   try {
     const result = await processReportBatch();
 
-    if (!result) {
+    if (result.status === "no_reports") {
       return NextResponse.json({
         message: "No hay reportes pendientes en este lote.",
         processed: 0,
       });
     }
 
+    if (result.status === "rate_limited") {
+      return NextResponse.json(
+        {
+          error: "OpenAI limitado a 1 llamada por hora.",
+          nextAllowedAt: result.nextAllowedAt,
+        },
+        { status: 429 }
+      );
+    }
+
+    const { data, usedOpenAI } = result;
     return NextResponse.json({
       message: "Lote procesado exitosamente.",
-      processed: result.legitimate.length + result.falsos.length,
-      legitimate: result.legitimate.length,
-      falsos: result.falsos.length,
-      resumenGeneral: result.resumenGeneral,
+      processed: data.legitimate.length + data.falsos.length,
+      legitimate: data.legitimate.length,
+      falsos: data.falsos.length,
+      resumenGeneral: data.resumenGeneral,
+      usedOpenAI,
     });
   } catch (error) {
     console.error("Batch processing error:", error);
@@ -55,6 +68,7 @@ export async function GET() {
   const pending = await getUnprocessedReports();
   const legitimate = await getLegitimateReports();
   const batches = await getBatchResults();
+  const openaiUsage = await getOpenAIUsageStats(pending.length);
 
   return NextResponse.json({
     pendingCount: pending.length,
@@ -64,7 +78,8 @@ export async function GET() {
     batches: batches.slice(0, 10),
     lastBatchTime: await getLastBatchTime(),
     storageBackend: getStorageBackend(),
+    openaiUsage,
     nextBatchNote:
-      "Triaje IA automático cada hora. Los reportes NO están confirmados — requieren verificación en terreno.",
+      "OpenAI: máximo 1 llamada por hora (cron). Sin reportes pendientes = $0 en esa hora.",
   });
 }

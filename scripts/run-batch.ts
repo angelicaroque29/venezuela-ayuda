@@ -1,18 +1,18 @@
-import { processReportBatch } from "@/lib/batch-processor";
+import { processReportBatchLegacy } from "@/lib/batch-processor";
 
 const INTERVAL_MS = 60 * 60 * 1000;
 
 async function runBatch() {
   console.log(`[${new Date().toISOString()}] Iniciando procesamiento por lotes...`);
   try {
-    const result = await processReportBatch();
+    const result = await processReportBatchLegacy();
     if (result) {
       console.log(
         `Lote completado: ${result.legitimate.length} legítimos, ${result.falsos.length} falsos`
       );
       console.log(`Resumen: ${result.resumenGeneral}`);
     } else {
-      console.log("Sin reportes pendientes.");
+      console.log("Sin reportes pendientes o rate limit activo (1 llamada OpenAI/hora).");
     }
   } catch (err) {
     console.error("Error en lote:", err);
@@ -22,7 +22,7 @@ async function runBatch() {
 const watchMode = process.argv.includes("--watch");
 
 if (watchMode) {
-  console.log("Modo cron activo: procesamiento cada hora.");
+  console.log("Modo cron activo: procesamiento cada hora. OpenAI: máx 1 llamada/hora.");
   runBatch();
   setInterval(runBatch, INTERVAL_MS);
 } else {

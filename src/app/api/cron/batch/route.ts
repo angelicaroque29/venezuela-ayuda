@@ -14,15 +14,31 @@ export async function GET(request: NextRequest) {
   try {
     const result = await processReportBatch();
 
-    if (!result) {
-      return NextResponse.json({ ok: true, processed: 0, message: "Sin reportes pendientes" });
+    if (result.status === "no_reports") {
+      return NextResponse.json({
+        ok: true,
+        processed: 0,
+        usedOpenAI: false,
+        message: "Sin reportes — no se llamó a OpenAI",
+      });
     }
 
+    if (result.status === "rate_limited") {
+      return NextResponse.json({
+        ok: false,
+        usedOpenAI: false,
+        message: "Rate limit: OpenAI ya fue llamado esta hora",
+        nextAllowedAt: result.nextAllowedAt,
+      });
+    }
+
+    const { data, usedOpenAI } = result;
     return NextResponse.json({
       ok: true,
-      processed: result.legitimate.length + result.falsos.length,
-      legitimate: result.legitimate.length,
-      falsos: result.falsos.length,
+      processed: data.legitimate.length + data.falsos.length,
+      legitimate: data.legitimate.length,
+      falsos: data.falsos.length,
+      usedOpenAI,
     });
   } catch (error) {
     console.error("Cron batch error:", error);
