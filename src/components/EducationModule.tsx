@@ -35,22 +35,55 @@ export default function EducationModule() {
           isOpen={openSection === "alertas"}
           onToggle={() => toggle("alertas")}
         >
-          <ol className="list-decimal space-y-3 pl-5 text-base leading-relaxed text-gray-200">
-            <li>
-              Abre <strong className="text-white">Ajustes</strong> en tu teléfono.
-            </li>
-            <li>
-              Busca <strong className="text-white">Seguridad y emergencia</strong>.
-            </li>
-            <li>
-              Activa <strong className="text-white">Alertas de terremotos</strong>.
-            </li>
-            <li>Acepta los permisos de ubicación.</li>
-          </ol>
-          <p className="mt-3 rounded-lg border-2 border-green-700/50 bg-green-950/40 p-3 text-sm text-green-200">
-            <strong className="text-green-100">✓ Recomendado:</strong> Google puede avisarte
-            segundos antes del temblor.
-          </p>
+          <div className="space-y-4">
+            <p className="text-base text-gray-200">
+              El <strong className="text-white">Sistema de alertas sísmicas de Android</strong>{" "}
+              (de Google) puede avisarte segundos antes de sentir el temblor. Es gratis.
+            </p>
+
+            <ol className="list-decimal space-y-3 pl-5 text-base leading-relaxed text-gray-200">
+              <li>
+                Abre <strong className="text-white">Ajustes</strong> (ícono ⚙️).
+              </li>
+              <li>
+                Entra en <strong className="text-white">Seguridad y emergencia</strong>.
+                <br />
+                <span className="text-sm text-crisis-muted">
+                  Alternativa: Ajustes → Ubicación → Servicios de ubicación
+                </span>
+              </li>
+              <li>
+                Activa <strong className="text-white">Alertas de terremotos</strong>.
+              </li>
+              <li>
+                Acepta permisos de <strong className="text-white">ubicación</strong> y{" "}
+                <strong className="text-white">notificaciones</strong>.
+              </li>
+            </ol>
+
+            <div className="rounded-lg border border-crisis-border bg-crisis-bg/60 p-3">
+              <p className="mb-2 text-sm font-semibold text-green-300">Rutas por marca:</p>
+              <ul className="space-y-1.5 text-sm text-gray-300">
+                <li>
+                  <strong className="text-white">Samsung:</strong> Seguridad y emergencia →
+                  Alertas inalámbricas
+                </li>
+                <li>
+                  <strong className="text-white">Xiaomi:</strong> Contraseñas y seguridad →
+                  Emergencia
+                </li>
+                <li>
+                  <strong className="text-white">Cualquiera:</strong> Busca «terremoto» en
+                  Ajustes 🔍
+                </li>
+              </ul>
+            </div>
+
+            <p className="rounded-lg border-2 border-green-700/50 bg-green-950/40 p-3 text-sm text-green-200">
+              <strong className="text-green-100">✓ Recomendado:</strong> Actívalo en el teléfono
+              de cada familiar. Necesitas Android 5+ y Google Play Services.
+            </p>
+          </div>
         </AccordionItem>
 
         <AccordionItem

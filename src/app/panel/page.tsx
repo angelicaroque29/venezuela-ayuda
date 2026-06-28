@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Clock, Shield, AlertTriangle, CheckCircle } from "lucide-react";
+import { ArrowLeft, Clock, Shield, AlertTriangle, CheckCircle, Info } from "lucide-react";
 
 interface BatchInfo {
   batchId: string;
@@ -41,102 +41,91 @@ function formatDate(iso: string): string {
 
 export default function PanelPage() {
   const [data, setData] = useState<PanelData | null>(null);
-  const [processing, setProcessing] = useState(false);
-
-  const loadData = async () => {
-    const res = await fetch("/api/batch");
-    setData(await res.json());
-  };
 
   useEffect(() => {
+    const loadData = async () => {
+      const res = await fetch("/api/batch");
+      setData(await res.json());
+    };
+
     loadData();
     const interval = setInterval(loadData, 60_000);
     return () => clearInterval(interval);
   }, []);
 
-  const runBatchNow = async () => {
-    setProcessing(true);
-    try {
-      await fetch("/api/batch", { method: "POST" });
-      await loadData();
-    } finally {
-      setProcessing(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-crisis-bg">
       <header className="border-b border-crisis-border px-4 py-4">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
+        <div className="mx-auto max-w-4xl space-y-3">
           <Link
             href="/"
-            className="flex items-center gap-2 text-sm text-crisis-muted hover:text-white"
+            className="inline-flex items-center gap-2 text-sm text-crisis-muted hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio
           </Link>
-          <h1 className="flex items-center gap-2 font-bold text-white">
-            <Shield className="h-5 w-5 text-crisis-alert" />
+          <h1 className="flex items-center gap-2 text-lg font-bold text-white sm:text-xl">
+            <Shield className="h-5 w-5 shrink-0 text-crisis-alert" />
             Panel de Brigadistas
           </h1>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-6">
-        <div className="grid gap-3 sm:grid-cols-3">
+      <main className="mx-auto max-w-4xl space-y-5 px-4 py-5 pb-8">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <StatCard
-            label="Pendientes de IA"
+            label="Pendientes"
             value={data?.pendingCount ?? "—"}
             icon={Clock}
           />
           <StatCard
-            label="Reportes legítimos"
+            label="Verificados"
             value={data?.legitimateReports.length ?? "—"}
             icon={CheckCircle}
           />
           <StatCard
             label="Último lote"
             value={
-              data?.lastBatchTime ? formatDate(data.lastBatchTime) : "Sin procesar"
+              data?.lastBatchTime ? formatDate(data.lastBatchTime) : "Sin datos"
             }
             icon={AlertTriangle}
             small
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={runBatchNow}
-            disabled={processing}
-            className="rounded-xl bg-crisis-alert px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {processing ? "Procesando lote..." : "Ejecutar lote ahora"}
-          </button>
-          <p className="text-xs text-crisis-muted">{data?.nextBatchNote}</p>
-        </div>
+        <p className="flex items-start gap-2 rounded-xl border border-crisis-border bg-crisis-surface px-4 py-3 text-sm text-crisis-muted">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" aria-hidden="true" />
+          {data?.nextBatchNote ??
+            "Los reportes se verifican automáticamente cada hora. Este panel es solo lectura."}
+        </p>
 
         {data?.batches[0] && (
           <section className="rounded-xl border border-crisis-border bg-crisis-surface p-4">
-            <h2 className="mb-2 font-semibold text-white">Último resumen de lote</h2>
-            <p className="text-sm text-gray-300">{data.batches[0].resumenGeneral}</p>
+            <h2 className="mb-2 text-base font-semibold text-white sm:text-lg">
+              Último resumen
+            </h2>
+            <p className="text-sm leading-relaxed text-gray-300">
+              {data.batches[0].resumenGeneral}
+            </p>
             <p className="mt-2 text-xs text-crisis-muted">
               {data.batches[0].reportCount} reportes ·{" "}
               {data.batches[0].legitimate.length} legítimos ·{" "}
-              {data.batches[0].falsos.length} falsos
+              {data.batches[0].falsos.length} filtrados
             </p>
           </section>
         )}
 
         <section>
-          <h2 className="mb-3 font-semibold text-white">Reportes verificados</h2>
-          <ul className="space-y-2" role="list">
+          <h2 className="mb-3 text-base font-semibold text-white sm:text-lg">
+            Reportes verificados
+          </h2>
+          <ul className="space-y-3" role="list">
             {(data?.legitimateReports ?? []).map((r) => (
               <li
                 key={r.id}
-                className="rounded-lg border border-crisis-border bg-crisis-surface p-3"
+                className="rounded-xl border border-crisis-border bg-crisis-surface p-4"
               >
-                <div className="mb-1 flex flex-wrap gap-2 text-xs">
+                <div className="mb-2 flex flex-wrap gap-2 text-xs">
                   {r.prioridad && (
                     <span
                       className={`rounded px-2 py-0.5 font-bold ${
@@ -158,14 +147,17 @@ export default function PanelPage() {
                   </span>
                 </div>
                 {r.ubicacion && (
-                  <p className="text-xs text-crisis-alert">📍 {r.ubicacion}</p>
+                  <p className="mb-1 text-sm text-crisis-alert">📍 {r.ubicacion}</p>
                 )}
-                <p className="text-sm text-gray-300">{r.resumen ?? r.text}</p>
+                <p className="text-sm leading-relaxed text-gray-300">
+                  {r.resumen ?? r.text}
+                </p>
               </li>
             ))}
             {data?.legitimateReports.length === 0 && (
               <p className="text-sm text-crisis-muted">
-                Aún no hay reportes verificados. Se actualizarán tras el próximo lote horario.
+                Aún no hay reportes verificados. Se actualizarán en el próximo ciclo
+                automático.
               </p>
             )}
           </ul>
@@ -187,12 +179,16 @@ function StatCard({
   small?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-crisis-border bg-crisis-surface p-4">
+    <div className="rounded-xl border border-crisis-border bg-crisis-surface p-3 sm:p-4">
       <div className="mb-1 flex items-center gap-2">
-        <Icon className="h-4 w-4 text-crisis-alert" />
+        <Icon className="h-4 w-4 shrink-0 text-crisis-alert" />
         <span className="text-xs text-crisis-muted">{label}</span>
       </div>
-      <p className={`font-bold text-white ${small ? "text-sm" : "text-2xl"}`}>{value}</p>
+      <p
+        className={`break-words font-bold text-white ${small ? "text-xs sm:text-sm" : "text-xl sm:text-2xl"}`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
