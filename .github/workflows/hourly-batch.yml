@@ -1,28 +1,59 @@
 # Triaje IA cada hora — GRATIS con GitHub Actions
-# Alternativa al cron de Vercel Pro ($20/mes)
 
 name: Hourly IA Batch
 
 on:
   schedule:
-    # Cada hora en punto (UTC)
     - cron: "0 * * * *"
-  workflow_dispatch: # Permite ejecutar manualmente desde GitHub
+  workflow_dispatch:
 
 jobs:
   run-batch:
     runs-on: ubuntu-latest
     steps:
       - name: Ejecutar triaje IA en Vercel
+        env:
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          response=$(curl -s -w "\n%{http_code}" -X GET \
-            "${{ secrets.DEPLOY_URL }}/api/cron/batch" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-          echo "Respuesta: $body"
-          echo "HTTP: $http_code"
-          if [ "$http_code" -ge 400 ]; then
-            echo "Error en el lote"
+          if [ -z "$DEPLOY_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "ERROR: Faltan secrets DEPLOY_URL o CRON_SECRET en GitHub"
             exit 1
           fi
+
+          # Quitar barra final si existe
+          BASE_URL="${DEPLOY_URL%/}"
+
+          echo "Llamando a ${BASE_URL}/api/batch ..."
+
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "${BASE_URL}/api/batch" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "HTTP: $http_code"
+          echo "Respuesta: $body"
+
+          if [ "$http_code" = "404" ]; then
+            echo ""
+            echo "ERROR 404: Vercel no tiene la ruta /api/batch."
+            echo "Solución: en Vercel → Deployments → Redeploy (usa rama main actualizada)"
+            exit 1
+          fi
+
+          if [ "$http_code" = "401" ]; then
+            echo ""
+            echo "ERROR 401: CRON_SECRET incorrecto."
+            echo "Debe ser IDÉNTICO en GitHub Secrets y Vercel Environment Variables."
+            exit 1
+          fi
+
+          if [ "$http_code" -ge 400 ]; then
+            echo "Error en el lote (HTTP $http_code)"
+            exit 1
+          fi
+
+          echo "OK — lote ejecutado correctamente"
