@@ -12,8 +12,6 @@ import {
 } from "lucide-react";
 import { validateReportLocally } from "@/lib/validate-report";
 
-const TELEGRAM_LINK =
-  process.env.NEXT_PUBLIC_TELEGRAM_BOT_LINK ?? "https://t.me/venezuela_sismo_bot";
 const WHATSAPP_NUMBER =
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "584121234567";
 
@@ -65,7 +63,7 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
       setUbicacion("");
     } catch {
       setStatus("error");
-      setMessage("Sin conexión. Intenta por Telegram o WhatsApp.");
+      setMessage("Sin conexión. Intenta por WhatsApp o vuelve a intentar.");
     }
   };
 
@@ -93,7 +91,7 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
                 ¿Necesitas ayuda? Reporta aquí
               </span>
               <span className="mt-0.5 block text-xs text-red-100 sm:text-sm">
-                Toca para abrir · Web, Telegram o WhatsApp
+                Toca para abrir · Formulario web o WhatsApp
               </span>
             </span>
           </span>
@@ -113,7 +111,6 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
               status={status}
               message={message}
               onSubmit={handleSubmit}
-              telegramLink={TELEGRAM_LINK}
               whatsappUrl={whatsappUrl}
             />
           </div>
@@ -135,7 +132,6 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
         status={status}
         message={message}
         onSubmit={handleSubmit}
-        telegramLink={TELEGRAM_LINK}
         whatsappUrl={whatsappUrl}
       />
     </section>
@@ -150,7 +146,6 @@ function ReportFormContent({
   status,
   message,
   onSubmit,
-  telegramLink,
   whatsappUrl,
 }: {
   text: string;
@@ -160,31 +155,19 @@ function ReportFormContent({
   status: "idle" | "loading" | "success" | "error";
   message: string;
   onSubmit: (e: React.FormEvent) => void;
-  telegramLink: string;
   whatsappUrl: string;
 }) {
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <a
-          href={telegramLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#0088cc] px-4 py-4 text-center text-base font-bold text-white transition-opacity hover:opacity-90"
-        >
-          <Send className="h-5 w-5" aria-hidden="true" />
-          Telegram
-        </a>
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-4 text-center text-base font-bold text-white transition-opacity hover:opacity-90"
-        >
-          <MessageCircle className="h-5 w-5" aria-hidden="true" />
-          WhatsApp
-        </a>
-      </div>
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-4 text-center text-base font-bold text-white transition-opacity hover:opacity-90"
+      >
+        <MessageCircle className="h-5 w-5" aria-hidden="true" />
+        Reportar por WhatsApp
+      </a>
 
       <form
         onSubmit={onSubmit}
