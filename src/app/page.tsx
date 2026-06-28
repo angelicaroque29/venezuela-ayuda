@@ -5,6 +5,7 @@ import EducationModule from "@/components/EducationModule";
 import ReportForm from "@/components/ReportForm";
 import NewsFeed from "@/components/NewsFeed";
 import ColorLegend from "@/components/ColorLegend";
+import AndroidAlertGuide from "@/components/AndroidAlertGuide";
 import { Heart, Shield } from "lucide-react";
 import Link from "next/link";
 
@@ -45,6 +46,8 @@ export default async function HomePage() {
 
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-6">
         <ReportForm prominent />
+
+        <AndroidAlertGuide />
 
         <ColorLegend />
 
