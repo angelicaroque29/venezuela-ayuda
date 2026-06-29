@@ -6,11 +6,25 @@ type KvCredentials = {
   token: string;
 };
 
+function cleanEnv(value: string | undefined): string {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
 function getKvCredentials(): KvCredentials | null {
-  const url =
-    process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL ?? "";
-  const token =
-    process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN ?? "";
+  const url = cleanEnv(
+    process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL
+  );
+  const token = cleanEnv(
+    process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN
+  );
 
   if (url && token) {
     return { url, token };
