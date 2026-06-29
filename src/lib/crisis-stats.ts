@@ -14,6 +14,7 @@ interface ExtractedFigure {
   source: string;
   publishedAt: string;
   excerpt: string;
+  isFamilies: boolean;
 }
 
 const KIND_PRIORITY: Record<ExtractedFigure["kind"], number> = {
@@ -26,7 +27,13 @@ const KIND_PRIORITY: Record<ExtractedFigure["kind"], number> = {
 const PATTERNS: Array<{
   kind: ExtractedFigure["kind"];
   regex: RegExp;
+  isFamilies?: boolean;
 }> = [
+  {
+    kind: "afectadas",
+    regex: /([\d.,]+)\s+familias?\s+damnificad[oa]s?/gi,
+    isFamilies: true,
+  },
   {
     kind: "afectadas",
     regex:
@@ -43,15 +50,21 @@ const PATTERNS: Array<{
   {
     kind: "heridos",
     regex:
-      /(?:más de|mas de|al menos)\s+([\d.,]+)\s*(?:personas?\s+)?(herid[oa]s?)/gi,
+      /(?:más de|mas de|al menos)\s+([\d.,]+)\s*(?:personas?\s+)?(herid[oa]s?|lesionad[oa]s?)/gi,
   },
   {
     kind: "heridos",
-    regex: /([\d.,]+)\s*(?:personas?\s+)?(herid[oa]s?)/gi,
+    regex: /([\d.,]+)\s*(?:personas?\s+)?(herid[oa]s?|lesionad[oa]s?)/gi,
   },
   {
     kind: "victimas",
-    regex: /([\d.,]+)\s*(?:personas?\s+)?(víctimas?|victimas?|fallecid[oa]s?|muertos?)/gi,
+    regex:
+      /(?:asciende a|cerca de|más de|mas de|al menos|saldo(?:\s+de la emergencia)?\s+asciende a|dejó|dejo|reportó|reporto|informó|informo)\s+([\d.,]+)\s+(?:fallecid[oa]s?|muertos?|víctimas?|victimas?)/gi,
+  },
+  {
+    kind: "victimas",
+    regex:
+      /([\d.,]+)\s*(?:personas?\s+)?(fallecid[oa]s?|muertos?|víctimas?|victimas?)/gi,
   },
 ];
 
@@ -77,15 +90,20 @@ function formatCount(count: number, isMinimum: boolean): string {
   return isMinimum ? `+${formatted}` : formatted;
 }
 
-function kindLabel(kind: ExtractedFigure["kind"], count: number): string {
+function kindLabel(figure: ExtractedFigure): string {
+  if (figure.isFamilies) {
+    return figure.count === 1 ? "familia damnificada" : "familias damnificadas";
+  }
+
   const labels: Record<ExtractedFigure["kind"], [string, string]> = {
     afectadas: ["persona afectada", "personas afectadas"],
     heridos: ["herido reportado", "heridos reportados"],
-    victimas: ["víctima reportada", "víctimas reportadas"],
+    victimas: ["fallecido reportado", "fallecidos reportados"],
     evacuados: ["persona evacuada", "personas evacuadas"],
   };
-  const [one, many] = labels[kind];
-  return count === 1 ? one : many;
+
+  const [one, many] = labels[figure.kind];
+  return figure.count === 1 ? one : many;
 }
 
 function extractFromText(
@@ -95,7 +113,7 @@ function extractFromText(
 ): ExtractedFigure[] {
   const figures: ExtractedFigure[] = [];
 
-  for (const { kind, regex } of PATTERNS) {
+  for (const { kind, regex, isFamilies } of PATTERNS) {
     regex.lastIndex = 0;
     let match: RegExpExecArray | null;
 
@@ -103,7 +121,13 @@ function extractFromText(
       const count = parseSpanishNumber(match[1]);
       if (!count) continue;
 
-      const prefix = text.slice(Math.max(0, match.index - 30), match.index).toLowerCase();
+      // Evitar falsos positivos como magnitud 4,6 o porcentajes 75%
+      const context = text
+        .slice(Math.max(0, match.index - 20), match.index + match[0].length + 10)
+        .toLowerCase();
+      if (/magnitud|%\s*$|por ciento|escala\s+richter/.test(context)) continue;
+
+      const prefix = text.slice(Math.max(0, match.index - 40), match.index).toLowerCase();
       const isMinimum =
         /(?:más de|mas de|al menos|superan|cerca de|aproximadamente|unos?)/i.test(
           match[0]
@@ -119,6 +143,7 @@ function extractFromText(
         source,
         publishedAt,
         excerpt: match[0].trim(),
+        isFamilies: !!isFamilies,
       });
     }
   }
@@ -129,13 +154,21 @@ function extractFromText(
 function pickBestFigure(figures: ExtractedFigure[]): ExtractedFigure | null {
   if (figures.length === 0) return null;
 
-  return figures.sort((a, b) => {
-    const dateDiff =
-      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-    if (Math.abs(dateDiff) > 6 * 60 * 60 * 1000) return dateDiff;
+  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const recent = figures.filter(
+    (f) => new Date(f.publishedAt).getTime() >= cutoff
+  );
+  const pool = recent.length > 0 ? recent : figures;
 
+  return pool.sort((a, b) => {
     const kindDiff = KIND_PRIORITY[b.kind] - KIND_PRIORITY[a.kind];
     if (kindDiff !== 0) return kindDiff;
+
+    const dateDiff =
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    if (dateDiff !== 0) return dateDiff;
+
+    if (a.isFamilies !== b.isFamilies) return a.isFamilies ? -1 : 1;
 
     return b.count - a.count;
   })[0];
@@ -162,7 +195,7 @@ export function extractAffectedPeopleStat(news: NewsItem[]): AffectedPeopleStat 
 
   return {
     value: formatCount(best.count, best.isMinimum),
-    sub: `${kindLabel(best.kind, best.count)} · según ${best.source}`,
+    sub: `${kindLabel(best)} · según ${best.source}`,
     source: best.source,
     updatedAt: best.publishedAt,
   };

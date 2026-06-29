@@ -57,7 +57,7 @@ export default async function HomePage() {
 
         <EarthquakeAlertGuide compact />
 
-        <CriticalStats affected={affectedStat} />
+        <CriticalStats initialAffected={affectedStat} />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-8">
           <div className="lg:col-span-3">
