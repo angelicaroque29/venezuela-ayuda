@@ -8,6 +8,7 @@ import {
   getPendingReportsList,
   getRejectedReports,
 } from "@/lib/report-store";
+import { enrichReport } from "@/lib/report-enrichment";
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.BATCH_CRON_SECRET || process.env.CRON_SECRET;
@@ -34,16 +35,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (result.status === "rate_limited") {
-      return NextResponse.json(
-        {
-          error: "OpenAI limitado a 1 llamada por hora.",
-          nextAllowedAt: result.nextAllowedAt,
-        },
-        { status: 429 }
-      );
-    }
-
     const { data, usedOpenAI } = result;
     return NextResponse.json({
       message: "Lote procesado exitosamente.",
@@ -55,8 +46,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Batch processing error:", error);
+    const message =
+      error instanceof Error ? error.message : "Error en procesamiento por lotes.";
     return NextResponse.json(
-      { error: "Error en procesamiento por lotes." },
+      { error: "Error en procesamiento por lotes.", detail: message },
       { status: 500 }
     );
   }
@@ -64,14 +57,16 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   const pending = await getUnprocessedReports();
-  const legitimate = await getLegitimateReports();
+  const legitimate = (await getLegitimateReports()).map(enrichReport);
+  const pendingReports = (await getPendingReportsList()).map(enrichReport);
+  const rejectedReports = (await getRejectedReports()).map(enrichReport);
   const batches = await getBatchResults();
 
   return NextResponse.json({
     pendingCount: pending.length,
     legitimateReports: legitimate.slice(0, 100),
-    pendingReports: (await getPendingReportsList()).slice(0, 50),
-    rejectedReports: (await getRejectedReports()).slice(0, 50),
+    pendingReports: pendingReports.slice(0, 50),
+    rejectedReports: rejectedReports.slice(0, 50),
     batches: batches.slice(0, 10),
     lastBatchTime: await getLastBatchTime(),
   });

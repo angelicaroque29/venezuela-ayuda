@@ -8,6 +8,8 @@ export type ReportSource = "web" | "telegram" | "whatsapp";
 /** triage_ia = pasó filtro IA, NO confirmado en terreno */
 export type VerificationLevel = "pendiente" | "triage_ia" | "rechazado";
 
+export type BrigadeStatus = "nuevo" | "en_revision" | "confirmado" | "descartado";
+
 export interface CitizenReport {
   id: string;
   text: string;
@@ -21,6 +23,9 @@ export interface CitizenReport {
   prioridad?: string;
   resumen?: string;
   triageReason?: string;
+  brigadeStatus?: BrigadeStatus;
+  brigadeNotes?: string;
+  brigadeUpdatedAt?: string;
 }
 
 export interface BatchResult {
@@ -127,4 +132,25 @@ export async function getRejectedReports(): Promise<CitizenReport[]> {
 export async function getLastBatchTime(): Promise<string | null> {
   const results = await getBatchResults();
   return results[0]?.processedAt ?? null;
+}
+
+export async function updateBrigadeStatus(
+  reportId: string,
+  brigadeStatus: BrigadeStatus,
+  brigadeNotes?: string
+): Promise<CitizenReport> {
+  const reports = await getAllReports();
+  const report = reports.find((r) => r.id === reportId);
+  if (!report) {
+    throw new Error("REPORT_NOT_FOUND");
+  }
+
+  report.brigadeStatus = brigadeStatus;
+  if (brigadeNotes !== undefined) {
+    report.brigadeNotes = brigadeNotes.trim() || undefined;
+  }
+  report.brigadeUpdatedAt = new Date().toISOString();
+
+  await setStorageItem(REPORTS_KEY, reports);
+  return report;
 }

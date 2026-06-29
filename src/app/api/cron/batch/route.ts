@@ -23,15 +23,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    if (result.status === "rate_limited") {
-      return NextResponse.json({
-        ok: false,
-        usedOpenAI: false,
-        message: "Rate limit: OpenAI ya fue llamado esta hora",
-        nextAllowedAt: result.nextAllowedAt,
-      });
-    }
-
     const { data, usedOpenAI } = result;
     return NextResponse.json({
       ok: true,
@@ -39,6 +30,7 @@ export async function GET(request: NextRequest) {
       legitimate: data.legitimate.length,
       falsos: data.falsos.length,
       usedOpenAI,
+      triageMode: usedOpenAI ? "openai" : "local",
     });
   } catch (error) {
     console.error("Cron batch error:", error);

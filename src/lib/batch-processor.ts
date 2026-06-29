@@ -6,6 +6,10 @@ import {
   CitizenReport,
 } from "./report-store";
 import { canCallOpenAI, recordOpenAICall } from "./openai-guard";
+import { localBatchAnalysis, normalizeBatchResult } from "./local-triage";
+import type { BatchAnalysisResult } from "./local-triage";
+
+export type { BatchAnalysisResult };
 
 export const VERIFICATION_METHODOLOGY = `
 La IA NO confirma hechos en terreno. Solo hace TRIAJE:
@@ -17,23 +21,9 @@ La IA NO confirma hechos en terreno. Solo hace TRIAJE:
 /** Máximo de reportes por lote para controlar tokens */
 const MAX_REPORTS_PER_BATCH = Number(process.env.MAX_REPORTS_PER_BATCH ?? 50);
 
-export interface BatchAnalysisResult {
-  legitimate: string[];
-  falsos: string[];
-  resumenGeneral: string;
-  detalles: Array<{
-    id: string;
-    categoria?: string;
-    prioridad?: string;
-    resumen?: string;
-    triageReason?: string;
-  }>;
-}
-
 export type BatchProcessResult =
   | { status: "processed"; data: BatchAnalysisResult; usedOpenAI: boolean }
-  | { status: "no_reports" }
-  | { status: "rate_limited"; nextAllowedAt: string };
+  | { status: "no_reports" };
 
 function buildBatchPrompt(reports: CitizenReport[]): string {
   const numbered = reports
@@ -78,25 +68,10 @@ Responde ÚNICAMENTE en JSON válido:
 }`;
 }
 
-function mockBatchAnalysis(reports: CitizenReport[]): BatchAnalysisResult {
-  return {
-    legitimate: reports.map((r) => r.id),
-    falsos: [],
-    resumenGeneral: `${reports.length} reportes en triaje (modo demo sin API key). Requieren confirmación en terreno.`,
-    detalles: reports.map((r) => ({
-      id: r.id,
-      categoria: "REPORTE_INFORMATIVO",
-      prioridad: "MEDIA",
-      resumen: r.text.slice(0, 80),
-      triageReason: "Modo demo: pasó filtro local de palabras clave.",
-    })),
-  };
-}
-
 async function callOpenAITriage(reports: CitizenReport[]): Promise<BatchAnalysisResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return mockBatchAnalysis(reports);
+    return localBatchAnalysis(reports);
   }
 
   const openai = new OpenAI({ apiKey });
@@ -118,7 +93,8 @@ async function callOpenAITriage(reports: CitizenReport[]): Promise<BatchAnalysis
   });
 
   const content = response.choices[0]?.message?.content ?? "{}";
-  return JSON.parse(content) as BatchAnalysisResult;
+  const parsed = JSON.parse(content) as Partial<BatchAnalysisResult>;
+  return normalizeBatchResult(parsed, reports);
 }
 
 export async function processReportBatch(): Promise<BatchProcessResult> {
@@ -134,19 +110,21 @@ export async function processReportBatch(): Promise<BatchProcessResult> {
   let usedOpenAI = false;
 
   if (!apiKey) {
-    analysis = mockBatchAnalysis(reports);
+    analysis = localBatchAnalysis(reports);
   } else {
     const guard = await canCallOpenAI();
-    if (!guard.allowed) {
-      return {
-        status: "rate_limited",
-        nextAllowedAt: guard.nextAllowedAt!,
-      };
+    if (guard.allowed) {
+      try {
+        analysis = await callOpenAITriage(reports);
+        await recordOpenAICall(reports.length);
+        usedOpenAI = true;
+      } catch (error) {
+        console.error("OpenAI triage failed, using local fallback:", error);
+        analysis = localBatchAnalysis(reports);
+      }
+    } else {
+      analysis = localBatchAnalysis(reports);
     }
-
-    analysis = await callOpenAITriage(reports);
-    await recordOpenAICall(reports.length);
-    usedOpenAI = true;
   }
 
   const metadata = new Map<
@@ -171,7 +149,9 @@ export async function processReportBatch(): Promise<BatchProcessResult> {
     legitimate: analysis.legitimate,
     falsos: analysis.falsos,
     resumenGeneral: analysis.resumenGeneral,
-    methodology: VERIFICATION_METHODOLOGY,
+    methodology: usedOpenAI
+      ? VERIFICATION_METHODOLOGY
+      : `${VERIFICATION_METHODOLOGY}\n\n(Triaje local — OpenAI no disponible o en espera)`,
   });
 
   return { status: "processed", data: analysis, usedOpenAI };
