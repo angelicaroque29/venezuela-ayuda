@@ -19,6 +19,7 @@ import {
   CATEGORY_LABELS,
   enrichReport,
 } from "@/lib/report-enrichment";
+import { peticionEmoji, peticionLabel, PETICION_TIPOS, type PeticionTipo } from "@/lib/peticion-types";
 import type { BrigadeStatus } from "@/lib/report-store";
 
 interface BatchInfo {
@@ -44,6 +45,7 @@ interface Report {
   brigadeNotes?: string;
   brigadeUpdatedAt?: string;
   zona?: string;
+  tipoPeticion?: PeticionTipo;
 }
 
 interface PanelData {
@@ -74,6 +76,7 @@ export default function PanelPage() {
   const [zoneFilter, setZoneFilter] = useState("ALL");
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("ALL");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [tipoFilter, setTipoFilter] = useState<PeticionTipo | "ALL">("ALL");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
@@ -120,6 +123,9 @@ export default function PanelPage() {
 
       if (categoryFilter !== "ALL" && r.categoria !== categoryFilter) return false;
 
+      const tipo = r.tipoPeticion ?? "otros";
+      if (tipoFilter !== "ALL" && tipo !== tipoFilter) return false;
+
       if (q) {
         const haystack = `${r.text} ${r.ubicacion ?? ""} ${r.zona ?? ""} ${r.resumen ?? ""} ${r.categoria ?? ""}`.toLowerCase();
         if (!haystack.includes(q)) return false;
@@ -127,7 +133,7 @@ export default function PanelPage() {
 
       return true;
     });
-  }, [allReports, search, triageFilter, brigadeFilter, zoneFilter, priorityFilter, categoryFilter]);
+  }, [allReports, search, triageFilter, brigadeFilter, zoneFilter, priorityFilter, categoryFilter, tipoFilter]);
 
   const updateBrigadeStatus = async (reportId: string, brigadeStatus: BrigadeStatus) => {
     setUpdatingId(reportId);
@@ -153,6 +159,7 @@ export default function PanelPage() {
     setZoneFilter("ALL");
     setPriorityFilter("ALL");
     setCategoryFilter("ALL");
+    setTipoFilter("ALL");
   };
 
   const hasActiveFilters =
@@ -161,7 +168,8 @@ export default function PanelPage() {
     brigadeFilter !== "todos" ||
     zoneFilter !== "ALL" ||
     priorityFilter !== "ALL" ||
-    categoryFilter !== "ALL";
+    categoryFilter !== "ALL" ||
+    tipoFilter !== "ALL";
 
   return (
     <div className="min-h-screen bg-crisis-bg">
@@ -303,6 +311,18 @@ export default function PanelPage() {
                   })),
                 ]}
               />
+              <FilterSelect
+                label="Tipo petición"
+                value={tipoFilter}
+                onChange={(v) => setTipoFilter(v as PeticionTipo | "ALL")}
+                options={[
+                  { value: "ALL", label: "Todos" },
+                  ...PETICION_TIPOS.map((t) => ({
+                    value: t.value,
+                    label: `${t.emoji} ${t.label}`,
+                  })),
+                ]}
+              />
             </div>
           </div>
 
@@ -323,6 +343,11 @@ export default function PanelPage() {
                 <div className="mb-2 flex flex-wrap gap-2 text-xs">
                   <TriageBadge status={r._triage} />
                   <BrigadeBadge status={r.brigadeStatus ?? "nuevo"} />
+                  {r.tipoPeticion && (
+                    <span className="rounded bg-crisis-alert/20 px-2 py-0.5 font-bold text-crisis-alert">
+                      {peticionEmoji(r.tipoPeticion)} {peticionLabel(r.tipoPeticion)}
+                    </span>
+                  )}
                   <span
                     className={`rounded px-2 py-0.5 font-bold ${
                       r.prioridad === "ALTA"

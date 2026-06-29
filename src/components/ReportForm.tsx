@@ -10,14 +10,24 @@ import {
   Megaphone,
 } from "lucide-react";
 import { validateReportLocally } from "@/lib/validate-report";
+import {
+  PETICION_TIPOS,
+  type PeticionTipo,
+} from "@/lib/peticion-types";
 
 interface ReportFormProps {
   defaultOpen?: boolean;
   prominent?: boolean;
+  defaultTipo?: PeticionTipo;
 }
 
-export default function ReportForm({ defaultOpen = false, prominent = false }: ReportFormProps) {
+export default function ReportForm({
+  defaultOpen = false,
+  prominent = false,
+  defaultTipo = "otros",
+}: ReportFormProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen || !prominent);
+  const [tipoPeticion, setTipoPeticion] = useState<PeticionTipo>(defaultTipo);
   const [text, setText] = useState("");
   const [ubicacion, setUbicacion] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -42,7 +52,7 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
       const res = await fetch("/api/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, ubicacion, source: "web" }),
+        body: JSON.stringify({ text, ubicacion, source: "web", tipoPeticion }),
       });
 
       const data = await res.json();
@@ -80,10 +90,12 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
             </span>
             <span className="min-w-0">
               <span className="block text-base font-bold leading-tight text-white sm:text-xl">
-                ¿Necesitas ayuda? Reporta aquí
+                {defaultTipo === "atrapados"
+                  ? "🆘 Estoy atrapado / necesito ayuda urgente"
+                  : "¿Necesitas ayuda? Publica tu solicitud"}
               </span>
               <span className="mt-0.5 block text-xs text-red-100 sm:text-sm">
-                Toca para abrir · Llega al panel de brigadas
+                Toca para abrir · Visible para brigadas y en /peticiones
               </span>
             </span>
           </span>
@@ -96,6 +108,8 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
         {isOpen && (
           <div id="report-panel" className="mt-4">
             <ReportFormContent
+              tipoPeticion={tipoPeticion}
+              setTipoPeticion={setTipoPeticion}
               text={text}
               setText={setText}
               ubicacion={ubicacion}
@@ -113,9 +127,11 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
   return (
     <section aria-labelledby="report-heading-inline" className="space-y-4">
       <h2 id="report-heading-inline" className="text-lg font-bold text-white">
-        Reporte ciudadano
+        Publicar petición
       </h2>
       <ReportFormContent
+        tipoPeticion={tipoPeticion}
+        setTipoPeticion={setTipoPeticion}
         text={text}
         setText={setText}
         ubicacion={ubicacion}
@@ -129,6 +145,8 @@ export default function ReportForm({ defaultOpen = false, prominent = false }: R
 }
 
 function ReportFormContent({
+  tipoPeticion,
+  setTipoPeticion,
   text,
   setText,
   ubicacion,
@@ -137,6 +155,8 @@ function ReportFormContent({
   message,
   onSubmit,
 }: {
+  tipoPeticion: PeticionTipo;
+  setTipoPeticion: (v: PeticionTipo) => void;
   text: string;
   setText: (v: string) => void;
   ubicacion: string;
@@ -150,15 +170,27 @@ function ReportFormContent({
       onSubmit={onSubmit}
       className="space-y-4 rounded-xl border-2 border-crisis-border bg-crisis-surface p-4 sm:p-5"
     >
-      <p className="rounded-lg bg-blue-950/40 px-3 py-2 text-sm text-blue-200">
-        Tu reporte se guarda en el servidor y lo ven las brigadas en{" "}
-        <strong className="text-blue-100">/panel</strong>.
-      </p>
-
-      <p className="rounded-lg bg-blue-950/40 px-3 py-2 text-sm text-blue-200">
-        <strong className="text-blue-100">Paso 1:</strong> Escribe dónde estás.{" "}
-        <strong className="text-blue-100">Paso 2:</strong> Describe qué necesitas.
-      </p>
+      <fieldset>
+        <legend className="mb-2 block text-sm font-medium text-white">
+          Tipo de solicitud
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {PETICION_TIPOS.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              onClick={() => setTipoPeticion(t.value)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm ${
+                tipoPeticion === t.value
+                  ? "border-crisis-alert bg-crisis-alert/20 text-white"
+                  : "border-crisis-border bg-crisis-bg text-crisis-muted hover:border-crisis-alert/50"
+              }`}
+            >
+              {t.emoji} {t.label}
+            </button>
+          ))}
+        </div>
+      </fieldset>
 
       <label className="block">
         <span className="mb-1.5 flex items-center gap-2 text-base font-medium text-white">
@@ -176,14 +208,18 @@ function ReportFormContent({
 
       <label className="block">
         <span className="mb-1.5 block text-base font-medium text-white">
-          ¿Qué está pasando? (daños, heridos, lo que necesitas)
+          Describe la situación y qué necesitas
         </span>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={4}
           required
-          placeholder="Ej: Edificio con grietas, necesitamos agua y mantas..."
+          placeholder={
+            tipoPeticion === "atrapados"
+              ? "Ej: Estamos atrapados en el piso 3, edificio con derrumbe parcial..."
+              : "Ej: Necesitamos medicinas, agua o refugio..."
+          }
           className="w-full resize-none rounded-lg border-2 border-crisis-border bg-crisis-bg px-4 py-3 text-base text-white placeholder:text-crisis-muted focus:border-yellow-400 focus:outline-none"
         />
       </label>
@@ -194,7 +230,7 @@ function ReportFormContent({
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-crisis-alert px-4 py-4 text-lg font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         <Send className="h-6 w-6" aria-hidden="true" />
-        {status === "loading" ? "Enviando..." : "Enviar reporte a brigadas"}
+        {status === "loading" ? "Publicando..." : "Publicar solicitud"}
       </button>
 
       {status === "success" && (

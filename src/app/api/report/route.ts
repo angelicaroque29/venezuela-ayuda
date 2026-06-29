@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateReportLocally } from "@/lib/validate-report";
 import { addReport, type ReportSource } from "@/lib/report-store";
 import { isProductionWithoutKv } from "@/lib/storage";
+import { inferPeticionTipo, type PeticionTipo } from "@/lib/peticion-types";
 
 const VALID_SOURCES: ReportSource[] = ["web", "telegram", "whatsapp"];
+const VALID_TIPOS: PeticionTipo[] = [
+  "atrapados",
+  "medicamentos",
+  "alimentos",
+  "buscar_persona",
+  "otros",
+];
 
 function storageErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -29,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { text, ubicacion, source = "web" } = body;
+    const { text, ubicacion, source = "web", tipoPeticion } = body;
 
     if (!text || typeof text !== "string") {
       return NextResponse.json(
@@ -53,12 +61,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const report = await addReport(text, source, ubicacion);
+    const resolvedTipo =
+      tipoPeticion && VALID_TIPOS.includes(tipoPeticion)
+        ? tipoPeticion
+        : inferPeticionTipo(text, ubicacion);
+
+    const report = await addReport(text, source, ubicacion, resolvedTipo);
 
     return NextResponse.json({
       success: true,
       message:
-        "Reporte enviado al panel de brigadas. Será revisado y priorizado.",
+        "Petición publicada. Las brigadas la verán en el panel y aparecerá en la lista pública.",
       reportId: report.id,
     });
   } catch (error) {

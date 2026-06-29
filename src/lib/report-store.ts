@@ -3,6 +3,8 @@ import {
   setStorageItem,
 } from "./storage";
 
+import type { PeticionTipo } from "./peticion-types";
+
 export type ReportSource = "web" | "telegram" | "whatsapp";
 
 /** triage_ia = pasó filtro IA, NO confirmado en terreno */
@@ -23,6 +25,7 @@ export interface CitizenReport {
   prioridad?: string;
   resumen?: string;
   triageReason?: string;
+  tipoPeticion?: PeticionTipo;
   brigadeStatus?: BrigadeStatus;
   brigadeNotes?: string;
   brigadeUpdatedAt?: string;
@@ -60,7 +63,8 @@ export async function getUnprocessedReports(since?: Date): Promise<CitizenReport
 export async function addReport(
   text: string,
   source: ReportSource,
-  ubicacion?: string
+  ubicacion?: string,
+  tipoPeticion?: PeticionTipo
 ): Promise<CitizenReport> {
   const reports = await getAllReports();
   const report: CitizenReport = {
@@ -68,6 +72,7 @@ export async function addReport(
     text: text.trim(),
     ubicacion,
     source,
+    tipoPeticion,
     createdAt: new Date().toISOString(),
     processed: false,
     verificationLevel: "pendiente",
@@ -132,6 +137,13 @@ export async function getRejectedReports(): Promise<CitizenReport[]> {
 export async function getLastBatchTime(): Promise<string | null> {
   const results = await getBatchResults();
   return results[0]?.processedAt ?? null;
+}
+
+export async function getPublicPetitions(): Promise<CitizenReport[]> {
+  const reports = await getAllReports();
+  return reports
+    .filter((r) => r.legitimate !== false)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export async function updateBrigadeStatus(

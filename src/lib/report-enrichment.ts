@@ -1,4 +1,5 @@
 import type { BrigadeStatus } from "./report-store";
+import type { PeticionTipo } from "./peticion-types";
 
 export const CATEGORY_LABELS: Record<string, string> = {
   DAÑO_ESTRUCTURAL: "Daño estructural",
@@ -57,8 +58,14 @@ export function inferPriority(report: {
   text: string;
   ubicacion?: string;
   prioridad?: string;
+  tipoPeticion?: PeticionTipo;
 }): string {
   if (report.prioridad) return report.prioridad.toUpperCase();
+
+  if (report.tipoPeticion === "atrapados" || report.tipoPeticion === "buscar_persona") {
+    return "ALTA";
+  }
+  if (report.tipoPeticion === "medicamentos") return "ALTA";
 
   const text = `${report.text} ${report.ubicacion ?? ""}`.toLowerCase();
   if (HIGH_PRIORITY.some((t) => text.includes(t))) return "ALTA";
@@ -100,6 +107,7 @@ export function enrichReport<
     prioridad?: string;
     categoria?: string;
     brigadeStatus?: BrigadeStatus;
+    tipoPeticion?: PeticionTipo;
   },
 >(report: T) {
   return {
