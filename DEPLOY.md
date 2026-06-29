@@ -21,18 +21,40 @@ Guía paso a paso para publicar **Alerta Sísmica Venezuela** y distribuirlo.
 
 ---
 
-## Paso 2 — Crear base de datos (Vercel KV)
+## Paso 2 — Base de datos GRATIS (Upstash Redis)
+
+> **No uses** Vercel → Storage → KV si te pide pagar ($8/mes). Eso es el marketplace de pago.
+>
+> **Usa Upstash directo — plan Free $0/mes** (256 MB, 500.000 comandos/mes). La app ya lo soporta.
 
 En producción los reportes **no pueden guardarse en archivos** (Vercel es serverless).
 
-1. En el dashboard de Vercel → tu proyecto → **Storage**
-2. Clic **Create Database** → **KV** (Redis)
-3. Nombre: `venezuela-sismo-kv`
-4. Conectar al proyecto
+### Opción recomendada — Upstash gratis (5 min)
 
-Vercel añade automáticamente:
-- `KV_REST_API_URL`
-- `KV_REST_API_TOKEN`
+1. Entra a [console.upstash.com](https://console.upstash.com) y crea cuenta (gratis)
+2. **Create Database** → Redis
+3. Nombre: `venezuela-sismo`
+4. Región: la más cercana (ej. `us-east-1`)
+5. **Plan: Free** — debe decir **$0/month**
+6. En la pestaña del database → **REST API** → copia:
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+
+7. En **Vercel** → tu proyecto → **Settings** → **Environment Variables**, añade:
+
+| Variable | Valor |
+|----------|-------|
+| `UPSTASH_REDIS_REST_URL` | `https://....upstash.io` |
+| `UPSTASH_REDIS_REST_TOKEN` | `AX...` |
+
+8. Aplica a **Production** (y Preview si quieres)
+9. **Redeploy** el proyecto
+
+Listo — los reportes se guardan sin pagar nada.
+
+### ¿Por qué no Vercel Storage?
+
+Vercel Storage → KV ahora enlaza planes de Upstash **de pago** desde $8/mes. El plan Free solo está disponible creando la base **directo en Upstash** y pegando las variables a mano.
 
 ---
 
@@ -44,8 +66,9 @@ En Vercel → **Settings** → **Environment Variables**, añade:
 |----------|-------|-------------|
 | `OPENAI_API_KEY` | `sk-...` | No (modo demo sin ella) |
 | `CRON_SECRET` | Clave secreta — genera con `npm run generate-cron-secret` | Sí (cron gratis) |
+| `UPSTASH_REDIS_REST_URL` | De Upstash console (plan Free) | Sí (reportes en producción) |
+| `UPSTASH_REDIS_REST_TOKEN` | De Upstash console (plan Free) | Sí (reportes en producción) |
 | `BATCH_CRON_SECRET` | Misma clave o otra | Opcional |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | `58412...` | Recomendado |
 
 `CRON_SECRET` lo creas tú. Ver [CRON-GRATIS.md](./CRON-GRATIS.md).
 
@@ -121,14 +144,14 @@ Una vez desplegado, comparte:
 | Entorno | Almacenamiento |
 |---------|----------------|
 | Local (`npm run dev`) | Archivos en `data/*.json` |
-| Vercel | Vercel KV (Redis) |
+| Vercel | Upstash Redis Free (`UPSTASH_REDIS_REST_*`) |
 
 ---
 
 ## Costos estimados
 
 - **Vercel Hobby**: gratis
-- **Cron (GitHub Actions o cron-job.org)**: gratis — ver [CRON-GRATIS.md](./CRON-GRATIS.md)
-- **Vercel KV**: tier gratis generoso para emergencias
-- **OpenAI**: ~$0.50–$4/mes según reportes (máx 1 llamada/hora)
-- **Vercel Pro**: ~$20/mes — solo si quieres cron nativo (no necesario)
+- **Upstash Redis Free**: gratis (256 MB, 500K comandos/mes — suficiente para emergencias)
+- **Cron (GitHub Actions)**: gratis — ver [CRON-GRATIS.md](./CRON-GRATIS.md)
+- **OpenAI**: ~$0.50–$4/mes según reportes (máx 1 llamada/hora) — opcional
+- **Vercel Pro**: ~$20/mes — no necesario
