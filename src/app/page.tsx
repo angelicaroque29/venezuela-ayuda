@@ -1,4 +1,5 @@
 import { fetchEarthquakeNews, getLatestReplicaAlert } from "@/lib/news-fetcher";
+import { extractAffectedPeopleStat } from "@/lib/crisis-stats";
 import LiveAlertBanner from "@/components/LiveAlertBanner";
 import CriticalStats from "@/components/CriticalStats";
 import EducationModule from "@/components/EducationModule";
@@ -15,6 +16,7 @@ export const revalidate = 300;
 export default async function HomePage() {
   const news = await fetchEarthquakeNews();
   const latestAlert = getLatestReplicaAlert(news);
+  const affectedStat = extractAffectedPeopleStat(news);
 
   return (
     <>
@@ -55,7 +57,7 @@ export default async function HomePage() {
 
         <EarthquakeAlertGuide compact />
 
-        <CriticalStats />
+        <CriticalStats affected={affectedStat} />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-8">
           <div className="lg:col-span-3">
